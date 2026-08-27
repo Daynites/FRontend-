@@ -1,0 +1,61 @@
+/* ─── Junín Anuncios — tokens de diseño ───────────────────────────
+   Referencia: tablón de anuncios de plaza — pines, franjas de color,
+   ligera imperfección — en vez de tarjetas de app genérica.
+   ------------------------------------------------------------------ */
+:root {
+  --paper: #eceee6;       /* fondo — papel con tinte verde-grisáceo, no crema */
+  --paper-raised: #f7f8f2;
+  --ink: #1d2b27;          /* texto principal */
+  --ink-soft: #55625c;     /* texto secundario */
+  --line: #d7d9cb;         /* divisores, bordes sutiles */
+  --marigold: #e2a233;     /* acento primario — categorías, CTAs */
+  --marigold-ink: #6b4610;
+  --berry: #a93c50;        /* pendiente / urgente */
+  --teal: #2c6e68;         /* aprobado / activo */
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --shadow-pin: 0 1px 2px rgba(29, 43, 39, 0.08), 0 6px 16px rgba(29, 43, 39, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  /* Respeta el safe-area del WebView de Telegram en iOS */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Foco visible — no lo quitamos, solo lo hacemos parte del sistema */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
