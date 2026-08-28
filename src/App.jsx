@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import BottomNav from "./components/BottomNav.jsx";
 import Home from "./pages/Home.jsx";
@@ -6,7 +6,6 @@ import Publicar from "./pages/Publicar.jsx";
 import Perfil from "./pages/Perfil.jsx";
 import Favoritos from "./pages/Favoritos.jsx";
 import AnuncioDetalle from "./pages/AnuncioDetalle.jsx";
-import { iniciarApp } from "./lib/telegram.js";
 import { NavegacionProvider } from "./lib/navegacion.js";
 
 const PANTALLAS = {
@@ -19,10 +18,6 @@ const PANTALLAS = {
 export default function App() {
   const [pestana, setPestana] = useState("inicio");
   const [anuncioAbiertoId, setAnuncioAbiertoId] = useState(null);
-
-  useEffect(() => {
-    iniciarApp();
-  }, []);
 
   const Pantalla = PANTALLAS[pestana];
 

@@ -288,9 +288,9 @@ function ChipSeleccion({ activa, onClick, children }) {
       onClick={onClick}
       whileTap={{ scale: 0.95 }}
       style={{
-        border: `1px solid ${activa ? "var(--marigold-ink)" : "var(--line)"}`,
-        background: activa ? "rgba(226, 162, 51, 0.18)" : "transparent",
-        color: activa ? "var(--marigold-ink)" : "var(--ink-soft)",
+        border: `1px solid ${activa ? "var(--terracota-ink)" : "var(--line)"}`,
+        background: activa ? "rgba(189, 79, 44, 0.16)" : "transparent",
+        color: activa ? "var(--terracota-ink)" : "var(--ink-soft)",
         borderRadius: 999,
         padding: "6px 12px",
         fontSize: 13,

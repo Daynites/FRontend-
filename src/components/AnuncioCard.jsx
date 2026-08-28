@@ -1,4 +1,5 @@
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import FranjaAndina from "./FranjaAndina.jsx";
 
 const COLOR_PIN = {
   aprobado: "var(--teal)",
@@ -10,10 +11,9 @@ const COLOR_PIN = {
 const UMBRAL_SWIPE = 90;
 
 /**
- * Tarjeta con look de "flyer pineado en un tablón": leve rotación
- * alterna, punto de pin arriba a la izquierda, y la categoría como
- * cinta en vez de pill genérica. Es el elemento firma del sistema —
- * el resto de la UI se mantiene sobria alrededor de esto.
+ * Tarjeta con look de "flyer pineado en un tablón", ahora con acento
+ * andino: franja de rombos escalonados arriba (FranjaAndina) en vez
+ * de un borde plano, y la categoría en terracota en vez de dorado.
  *
  * Swipe a la derecha = favorito (como en la versión anterior de la app).
  * Si no hay `onFavoritar`, la tarjeta simplemente no arrastra.
@@ -73,74 +73,80 @@ export default function AnuncioCard({ anuncio, indice = 0, onClick, onFavoritar 
             border: "1px solid var(--line)",
             borderRadius: "var(--radius-card)",
             boxShadow: "var(--shadow-pin)",
-            padding: "18px 16px 16px",
+            overflow: "hidden",
             cursor: "pointer",
           }}
         >
-          <span
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: 10,
-              left: 14,
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: COLOR_PIN[anuncio.estado] ?? "var(--ink-soft)",
-            }}
+          <FranjaAndina
+            color={indice % 2 === 0 ? "var(--terracota)" : "var(--marigold)"}
           />
 
-          <span
-            style={{
-              display: "inline-block",
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: "0.02em",
-              color: "var(--marigold-ink)",
-              background: "rgba(226, 162, 51, 0.16)",
-              borderRadius: 6,
-              padding: "3px 8px",
-              marginBottom: 10,
-            }}
-          >
-            {anuncio.categoria}
-          </span>
+          <div style={{ position: "relative", padding: "16px 16px 16px" }}>
+            <span
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: 4,
+                left: 14,
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: COLOR_PIN[anuncio.estado] ?? "var(--ink-soft)",
+              }}
+            />
 
-          <h3
-            style={{
-              margin: "0 0 4px",
-              fontFamily: "var(--font-display)",
-              fontSize: 18,
-              fontWeight: 600,
-              lineHeight: 1.25,
-            }}
-          >
-            {anuncio.titulo}
-          </h3>
+            <span
+              style={{
+                display: "inline-block",
+                fontFamily: "var(--font-body)",
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+                color: "var(--terracota-ink)",
+                background: "rgba(189, 79, 44, 0.14)",
+                borderRadius: 6,
+                padding: "3px 8px",
+                marginBottom: 10,
+              }}
+            >
+              {anuncio.categoria}
+            </span>
 
-          <p
-            style={{
-              margin: "0 0 10px",
-              fontSize: 14,
-              color: "var(--ink-soft)",
-              lineHeight: 1.4,
-            }}
-          >
-            {anuncio.descripcion}
-          </p>
+            <h3
+              style={{
+                margin: "0 0 4px",
+                fontFamily: "var(--font-display)",
+                fontSize: 18,
+                fontWeight: 600,
+                lineHeight: 1.25,
+              }}
+            >
+              {anuncio.titulo}
+            </h3>
 
-          <footer
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 12.5,
-              color: "var(--ink-soft)",
-            }}
-          >
-            <span>📍 {anuncio.distrito}</span>
-            <span>{anuncio.fecha}</span>
-          </footer>
+            <p
+              style={{
+                margin: "0 0 10px",
+                fontSize: 14,
+                color: "var(--ink-soft)",
+                lineHeight: 1.4,
+              }}
+            >
+              {anuncio.descripcion}
+            </p>
+
+            <footer
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: 12.5,
+                color: "var(--ink-soft)",
+              }}
+            >
+              <span>📍 {anuncio.distrito}</span>
+              <span>{anuncio.fecha}</span>
+            </footer>
+          </div>
         </div>
       </motion.article>
     </div>

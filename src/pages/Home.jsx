@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AnuncioCard from "../components/AnuncioCard.jsx";
+import FranjaAndina from "../components/FranjaAndina.jsx";
 import { agregarFavorito, listarAnuncios, listarCategorias } from "../api/client.js";
 import { useNavegacion } from "../lib/navegacion.js";
 import { useSesion } from "../lib/auth.js";
@@ -89,6 +90,9 @@ export default function Home() {
         <p style={{ margin: 0, fontSize: 13, color: "var(--ink-soft)" }}>
           Oportunidades cerca de ti — desliza una tarjeta a la derecha para guardarla
         </p>
+        <div style={{ margin: "10px -16px 0", width: "calc(100% + 32px)" }}>
+          <FranjaAndina altura={5} />
+        </div>
       </header>
 
       <div
@@ -161,8 +165,8 @@ function FiltroPill({ activa, onClick, children }) {
       whileTap={{ scale: 0.95 }}
       style={{
         flexShrink: 0,
-        border: `1px solid ${activa ? "var(--ink)" : "var(--line)"}`,
-        background: activa ? "var(--ink)" : "transparent",
+        border: `1px solid ${activa ? "var(--terracota)" : "var(--line)"}`,
+        background: activa ? "var(--terracota)" : "transparent",
         color: activa ? "var(--paper)" : "var(--ink-soft)",
         borderRadius: 999,
         padding: "6px 14px",

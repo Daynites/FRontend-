@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { obtenerAnuncio } from "../api/client.js";
-import { abrirLink } from "../lib/telegram.js";
+import { abrirLink } from "../lib/links.js";
 
 const ESTADO = {
   pendiente: { color: "var(--marigold)", texto: "En revisión" },
@@ -60,8 +60,8 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
               display: "inline-block",
               fontSize: 12.5,
               fontWeight: 600,
-              color: "var(--marigold-ink)",
-              background: "rgba(226, 162, 51, 0.16)",
+              color: "var(--terracota-ink)",
+              background: "rgba(189, 79, 44, 0.14)",
               borderRadius: 6,
               padding: "4px 10px",
               marginBottom: 14,
