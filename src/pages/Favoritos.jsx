@@ -22,10 +22,8 @@ export default function Favoritos() {
   if (!sesion) {
     return (
       <div style={{ padding: "48px 24px", textAlign: "center" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, marginBottom: 6 }}>
-          Tus favoritos
-        </h2>
-        <p style={{ color: "var(--ink-soft)", fontSize: 14, marginBottom: 24 }}>
+        <h2 style={{ fontFamily: "var(--font-heading)", fontSize: 20, marginBottom: 6 }}>Tus favoritos</h2>
+        <p style={{ color: "var(--ink-3)", fontSize: 14, marginBottom: 24 }}>
           Inicia sesión para guardar y ver tus anuncios favoritos.
         </p>
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -35,81 +33,60 @@ export default function Favoritos() {
     );
   }
 
-  async function quitar(anuncioId) {
-    setAnuncios((prev) => prev.filter((a) => a.id !== anuncioId));
+  async function alGuardar(anuncioId, nuevoEstado) {
+    if (nuevoEstado) return; // en esta pantalla solo se puede quitar
     try {
       await quitarFavorito(anuncioId);
-    } catch {
-      listarFavoritos().then((d) => setAnuncios(d.anuncios));
+      setAnuncios((prev) => prev.filter((a) => a.id !== anuncioId));
+    } catch (e) {
+      setError(e.message);
+      throw e;
     }
   }
 
   return (
-    <div style={{ padding: "16px 16px 24px" }}>
-      <header style={{ marginBottom: 16 }}>
-        <h1
+    <div style={{ padding: "14px 14px 16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+        <span
           style={{
-            margin: "0 0 2px",
-            fontFamily: "var(--font-display)",
-            fontSize: 24,
-            fontWeight: 800,
+            fontFamily: "var(--font-heading)",
+            fontSize: 10,
+            letterSpacing: 2.5,
+            color: "var(--gold)",
+            textTransform: "uppercase",
           }}
         >
-          Tus favoritos
-        </h1>
-        <p style={{ margin: 0, fontSize: 13, color: "var(--ink-soft)" }}>
-          Desliza a la derecha en Inicio para agregar más
-        </p>
-      </header>
+          📌 Tus favoritos
+        </span>
+        <span style={{ flex: 1, height: 1, background: "linear-gradient(to right, var(--parch-3), transparent)" }} />
+      </div>
 
       {error && (
-        <p style={{ color: "var(--berry)", fontSize: 14 }}>
-          No se pudo cargar tu lista: {error}
-        </p>
+        <p style={{ color: "var(--red-andino)", fontSize: 14 }}>No se pudo cargar tu lista: {error}</p>
       )}
 
       {anuncios === null && !error && (
-        <p style={{ color: "var(--ink-soft)", fontSize: 14 }}>Cargando…</p>
+        <p style={{ color: "var(--ink-3)", fontSize: 14 }}>Cargando…</p>
       )}
 
       {anuncios && anuncios.length === 0 && (
-        <p style={{ color: "var(--ink-soft)", fontSize: 14 }}>
-          Todavía no guardaste ningún anuncio.
+        <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>
+          Todavía no guardaste ningún anuncio. Tocá el 📌 en Inicio para guardarlo acá.
         </p>
       )}
 
       {anuncios && anuncios.length > 0 && (
-        <div style={{ display: "grid", gap: 12 }}>
+        <div style={{ display: "grid", gap: 14 }}>
           <AnimatePresence mode="popLayout">
             {anuncios.map((anuncio, i) => (
-              <div key={anuncio.id} style={{ position: "relative" }}>
-                <AnuncioCard
-                  anuncio={anuncio}
-                  indice={i}
-                  onClick={() => abrirAnuncio(anuncio.id)}
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    quitar(anuncio.id);
-                  }}
-                  aria-label="Quitar de favoritos"
-                  style={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    border: "1px solid var(--line)",
-                    background: "var(--paper-raised)",
-                    borderRadius: 999,
-                    width: 26,
-                    height: 26,
-                    fontSize: 13,
-                    color: "var(--berry)",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+              <AnuncioCard
+                key={anuncio.id}
+                anuncio={anuncio}
+                indice={i}
+                onClick={() => abrirAnuncio(anuncio.id)}
+                onGuardar={alGuardar}
+                guardadoInicial
+              />
             ))}
           </AnimatePresence>
         </div>

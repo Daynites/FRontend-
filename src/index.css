@@ -1,28 +1,60 @@
 /* ─── Junín Anuncios — tokens de diseño ───────────────────────────
-   Referencia: identidad andina de Junín — pergamino, textiles con
-   rombos escalonados, terracota y oro — pero resuelta en vector/CSS
-   en vez de texturas raster pesadas. Mismo espíritu, más nítido y
-   liviano, y que sí se puede animar con Framer Motion.
+   Identidad "pergamino andino": mismos tokens que el prototipo
+   estático (Daynite), para que la migración a React no pierda nada
+   del look original. Se agregan alias con los nombres viejos
+   (--paper, --ink-soft, --terracota, etc.) apuntando a estos nuevos
+   valores, así el resto de páginas que aún no se migraron (Publicar,
+   Perfil, Favoritos, AnuncioDetalle) siguen viéndose bien sin tener
+   que tocar cada archivo en esta fase.
    ------------------------------------------------------------------ */
 :root {
-  --paper: #f3e6c8;        /* pergamino cálido */
-  --paper-raised: #fbf3e2;
-  --ink: #3b2418;           /* texto principal — marrón cuero oscuro */
-  --ink-soft: #8a6b4f;      /* texto secundario */
-  --line: #dcc394;         /* divisores, bordes sutiles */
+  --parch-0: #fdf8ec; /* pergamino más claro */
+  --parch-1: #f7edcc; /* pergamino base */
+  --parch-2: #eedfa0; /* pergamino medio */
+  --parch-3: #d4b96a; /* pergamino oscuro */
+  --ink: #1e0f00;
+  --ink-2: #4a2e0a;
+  --ink-3: #7a5020;
+  --brown: #3b1e07;
+  --brown-2: #5a3010;
+  --brown-3: #7a4018;
+  --gold: #c49a28;
+  --gold-2: #e8c84a;
+  --gold-3: #f5e090;
+  --red-andino: #8b2020;
+  --rojo-alerta: #d32f2f;
+  --green: #1e6b34;
+  --green-2: #28a04e;
 
-  --terracota: #bd4f2c;     /* acento primario — rojo de textiles andinos */
-  --terracota-ink: #7a2f18;
-  --marigold: #d99a2b;      /* acento secundario — "sol de Junín" */
-  --marigold-ink: #6b4610;
-  --berry: #9c3255;         /* pendiente / urgente */
-  --teal: #2c5f63;          /* aprobado / activo — azul de atardecer andino */
+  --shadow-sm: 0 1px 4px rgba(30, 15, 0, 0.14);
+  --shadow-md: 0 3px 12px rgba(30, 15, 0, 0.18);
+  --shadow-lg: 0 8px 28px rgba(30, 15, 0, 0.22);
 
-  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
-  --font-body: "Public Sans", system-ui, sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 100px;
 
-  --radius-card: 14px;
-  --shadow-pin: 0 1px 2px rgba(59, 36, 24, 0.12), 0 6px 16px rgba(59, 36, 24, 0.1);
+  --font-heading: "Cinzel", serif;
+  --font-serif: "Lora", serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+
+  /* ── Alias de compatibilidad (nombres usados en Publicar/Perfil/
+     Favoritos/AnuncioDetalle hasta que se migren en fases futuras) ── */
+  --paper: var(--parch-1);
+  --paper-raised: var(--parch-0);
+  --ink-soft: var(--ink-3);
+  --line: var(--parch-2);
+  --terracota: var(--red-andino);
+  --terracota-ink: var(--brown-2);
+  --marigold: var(--gold);
+  --marigold-ink: var(--brown-2);
+  --berry: var(--red-andino);
+  --teal: var(--green);
+  --font-display: var(--font-heading);
+  --font-body: var(--font-serif);
+  --radius-card: var(--radius-md);
+  --shadow-pin: var(--shadow-md);
 }
 
 * {
@@ -37,9 +69,9 @@ body,
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--parch-1) url("/assets/fondo_pergamino.webp") center / cover no-repeat fixed;
   color: var(--ink);
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -50,7 +82,7 @@ button {
 
 /* Foco visible — no lo quitamos, solo lo hacemos parte del sistema */
 :focus-visible {
-  outline: 2px solid var(--teal);
+  outline: 2px solid var(--green);
   outline-offset: 2px;
 }
 

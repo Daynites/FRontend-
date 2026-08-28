@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { obtenerAnuncio } from "../api/client.js";
-import { abrirLink } from "../lib/links.js";
+import { abrirLink, linkWhatsapp } from "../lib/links.js";
 
 const ESTADO = {
   pendiente: { color: "var(--marigold)", texto: "En revisión" },
@@ -9,14 +9,6 @@ const ESTADO = {
   rechazado: { color: "var(--berry)", texto: "Rechazado" },
   expirado: { color: "var(--ink-soft)", texto: "Expirado" },
 };
-
-/** Arma un link wa.me a partir del número guardado (asume Perú, +51). */
-function linkWhatsapp(numero, mensaje) {
-  const digitos = numero.replace(/\D/g, "");
-  const conPrefijo = digitos.startsWith("51") ? digitos : `51${digitos}`;
-  const texto = encodeURIComponent(mensaje);
-  return `https://wa.me/${conPrefijo}?text=${texto}`;
-}
 
 export default function AnuncioDetalle({ anuncioId, onVolver }) {
   const [anuncio, setAnuncio] = useState(null);

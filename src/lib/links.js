@@ -8,3 +8,11 @@
 export function abrirLink(url) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
+
+/** Arma un link wa.me a partir del número guardado (asume Perú, +51). */
+export function linkWhatsapp(numero, mensaje) {
+  const digitos = numero.replace(/\D/g, "");
+  const conPrefijo = digitos.startsWith("51") ? digitos : `51${digitos}`;
+  const texto = encodeURIComponent(mensaje);
+  return `https://wa.me/${conPrefijo}?text=${texto}`;
+}

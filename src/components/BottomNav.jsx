@@ -1,70 +1,118 @@
-import { motion } from "framer-motion";
 import FranjaAndina from "./FranjaAndina.jsx";
 
+/**
+ * NOTA: el prototipo original no tiene una tab de "Favoritos" en el
+ * bottom nav (ahí vive dentro de Perfil) y tampoco trae un ícono
+ * ilustrado para ese caso. Se usa un emoji ⭐ como marcador temporal
+ * hasta contar con un asset dedicado.
+ */
 const TABS = [
-  { id: "inicio", label: "Inicio", icono: "🏠" },
-  { id: "favoritos", label: "Favoritos", icono: "⭐" },
-  { id: "publicar", label: "Publicar", icono: "➕" },
-  { id: "perfil", label: "Perfil", icono: "👤" },
+  { id: "inicio", label: "Inicio", icono: "/assets/nav_inicio.webp" },
+  { id: "favoritos", label: "Favoritos", emoji: "⭐" },
+  { id: "perfil", label: "Perfil", icono: "/assets/nav_perfil.webp" },
 ];
 
 export default function BottomNav({ activa, onCambiar }) {
+  const mitad = Math.ceil(TABS.length / 2);
+  const izquierda = TABS.slice(0, mitad);
+  const derecha = TABS.slice(mitad);
+
   return (
     <nav
       style={{
         position: "sticky",
         bottom: 0,
-        background: "var(--paper-raised)",
+        background: "rgba(247,237,204,.9)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
       }}
     >
-      <FranjaAndina color="var(--terracota)" altura={4} />
+      <FranjaAndina altura={2} />
       <div
         style={{
           display: "flex",
-          justifyContent: "space-around",
-          padding: "8px 4px calc(8px + env(safe-area-inset-bottom))",
+          alignItems: "center",
+          padding: "6px 4px calc(6px + env(safe-area-inset-bottom))",
         }}
       >
-        {TABS.map((tab) => {
-          const esActiva = tab.id === activa;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onCambiar(tab.id)}
-              style={{
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 2,
-                background: "none",
-                border: "none",
-                padding: "6px 12px",
-                color: esActiva ? "var(--ink)" : "var(--ink-soft)",
-                fontSize: 11,
-                fontWeight: 600,
-              }}
-            >
-              <span style={{ fontSize: 18 }}>{tab.icono}</span>
-              {tab.label}
-              {esActiva && (
-                <motion.span
-                  layoutId="nav-indicador"
-                  style={{
-                    position: "absolute",
-                    bottom: -8,
-                    width: 4,
-                    height: 4,
-                    borderRadius: "50%",
-                    background: "var(--terracota)",
-                  }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              )}
-            </button>
-          );
-        })}
+        {izquierda.map((tab) => (
+          <NavItem key={tab.id} tab={tab} activa={activa === tab.id} onClick={() => onCambiar(tab.id)} />
+        ))}
+
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <button
+            onClick={() => onCambiar("publicar")}
+            aria-label="Publicar anuncio"
+            style={{
+              width: 52,
+              height: 52,
+              marginTop: -20,
+              borderRadius: "50%",
+              border: "2.5px solid var(--gold)",
+              background: "linear-gradient(135deg, var(--brown), var(--brown-3))",
+              boxShadow: "0 0 14px rgba(196,154,40,.35)",
+              fontSize: 22,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ⚡
+          </button>
+        </div>
+
+        {derecha.map((tab) => (
+          <NavItem key={tab.id} tab={tab} activa={activa === tab.id} onClick={() => onCambiar(tab.id)} />
+        ))}
       </div>
     </nav>
+  );
+}
+
+function NavItem({ tab, activa, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        background: "none",
+        border: "none",
+        padding: "4px 0",
+        cursor: "pointer",
+        opacity: activa ? 1 : 0.45,
+      }}
+    >
+      {tab.icono ? (
+        <img
+          src={tab.icono}
+          alt=""
+          style={{
+            width: 40,
+            height: 40,
+            objectFit: "contain",
+            marginTop: -6,
+            filter: "drop-shadow(0 2px 5px rgba(30,15,0,.6))",
+          }}
+        />
+      ) : (
+        <span style={{ fontSize: 20 }}>{tab.emoji}</span>
+      )}
+      <span
+        style={{
+          fontFamily: "var(--font-heading)",
+          fontSize: 8,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+          color: activa ? "var(--brown)" : "var(--ink-3)",
+        }}
+      >
+        {tab.label}
+      </span>
+    </button>
   );
 }

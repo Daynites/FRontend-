@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import AppHeader from "./components/AppHeader.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import Home from "./pages/Home.jsx";
 import Publicar from "./pages/Publicar.jsx";
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <NavegacionProvider value={{ abrirAnuncio: setAnuncioAbiertoId }}>
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        {!anuncioAbiertoId && <AppHeader onAbrirPerfil={() => setPestana("perfil")} />}
         <main style={{ flex: 1 }}>
           <AnimatePresence mode="wait">
             {anuncioAbiertoId ? (

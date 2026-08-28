@@ -1,24 +1,23 @@
 /**
- * Franja de rombos escalonados — referencia directa al borde textil
- * de la interfaz anterior, pero como patrón SVG repetible en vez de
- * una imagen raster: nítido a cualquier tamaño, liviano, y se puede
- * recolorear con CSS var() en vez de exportar un asset por color.
+ * Cenefa andina — franja a rayas repetidas (rojo / oro / verde /
+ * pergamino), igual a la del prototipo estático original. Se usa
+ * como borde decorativo en la cabecera, el modal de detalle y el
+ * bottom nav.
+ *
+ * Antes esto era un patrón de rombos en SVG; se reemplaza por esta
+ * versión a rayas para calzar con el diseño de referencia (Fase 1).
  */
-export default function FranjaAndina({ color = "var(--terracota)", altura = 6 }) {
+export default function FranjaAndina({ altura = 3 }) {
   return (
-    <svg
-      width="100%"
-      height={altura}
-      viewBox="0 0 32 8"
-      preserveAspectRatio="xMidYMid slice"
+    <div
       aria-hidden="true"
-      style={{ display: "block" }}
-    >
-      <pattern id="rombos-andinos" width="16" height="8" patternUnits="userSpaceOnUse">
-        <path d="M0 4 L4 0 L8 4 L4 8 Z" fill={color} />
-        <path d="M8 4 L12 0 L16 4 L12 8 Z" fill={color} opacity="0.45" />
-      </pattern>
-      <rect width="100%" height="100%" fill="url(#rombos-andinos)" />
-    </svg>
+      style={{
+        width: "100%",
+        height: altura,
+        flexShrink: 0,
+        background:
+          "repeating-linear-gradient(90deg, var(--red-andino) 0px, var(--red-andino) 8px, var(--gold) 8px, var(--gold) 16px, var(--green) 16px, var(--green) 24px, var(--parch-2) 24px, var(--parch-2) 32px)",
+      }}
+    />
   );
 }

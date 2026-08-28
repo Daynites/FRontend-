@@ -1,154 +1,198 @@
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import FranjaAndina from "./FranjaAndina.jsx";
-
-const COLOR_PIN = {
-  aprobado: "var(--teal)",
-  pendiente: "var(--marigold)",
-  rechazado: "var(--berry)",
-  expirado: "var(--ink-soft)",
-};
-
-const UMBRAL_SWIPE = 90;
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { abrirLink, linkWhatsapp } from "../lib/links.js";
 
 /**
- * Tarjeta con look de "flyer pineado en un tablón", ahora con acento
- * andino: franja de rombos escalonados arriba (FranjaAndina) en vez
- * de un borde plano, y la categoría en terracota en vez de dorado.
- *
- * Swipe a la derecha = favorito (como en la versión anterior de la app).
- * Si no hay `onFavoritar`, la tarjeta simplemente no arrastra.
+ * Tarjeta "flyer de pergamino" — migrada del prototipo estático.
+ * Antes esto se guardaba en favoritos deslizando la tarjeta; ahora
+ * es un botón de pin 📌 explícito (más descubrible, y funciona igual
+ * de bien con mouse que con dedo). "Postular" abre WhatsApp directo
+ * con un mensaje precargado, sin pasar por el detalle.
  */
-export default function AnuncioCard({ anuncio, indice = 0, onClick, onFavoritar }) {
-  const inclinacion = indice % 2 === 0 ? -0.6 : 0.6;
-  const x = useMotionValue(0);
-  const opacidadCorazon = useTransform(x, [0, UMBRAL_SWIPE], [0, 1]);
-  const escalaCorazon = useTransform(x, [0, UMBRAL_SWIPE], [0.6, 1.1]);
+export default function AnuncioCard({
+  anuncio,
+  indice = 0,
+  onClick,
+  onGuardar,
+  guardadoInicial = false,
+}) {
+  const [guardado, setGuardado] = useState(guardadoInicial);
+  const [guardando, setGuardando] = useState(false);
 
-  function alSoltar(_, info) {
-    if (onFavoritar && info.offset.x > UMBRAL_SWIPE) {
-      onFavoritar(anuncio.id);
+  async function alTocarPin(e) {
+    e.stopPropagation();
+    if (!onGuardar || guardando) return;
+    setGuardando(true);
+    const nuevoEstado = !guardado;
+    try {
+      await onGuardar(anuncio.id, nuevoEstado);
+      setGuardado(nuevoEstado);
+    } finally {
+      setGuardando(false);
     }
   }
 
+  function postular(e) {
+    e.stopPropagation();
+    const mensaje = `Hola, me interesa el puesto de "${anuncio.titulo}" que vi en Junín Anuncios 👋`;
+    abrirLink(linkWhatsapp(anuncio.whatsapp, mensaje));
+  }
+
   return (
-    <div style={{ position: "relative" }}>
-      {onFavoritar && (
-        <motion.span
-          aria-hidden="true"
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 340, damping: 30 }}
+      onClick={onClick}
+      style={{
+        position: "relative",
+        background: "url('/assets/card_marco.webp') center / 100% 100% no-repeat",
+        borderRadius: 6,
+        padding: "14px 14px 12px",
+        boxShadow: "var(--shadow-md)",
+        cursor: "pointer",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+        <span
           style={{
-            position: "absolute",
-            top: "50%",
-            left: 14,
-            translateY: "-50%",
-            fontSize: 22,
-            opacity: opacidadCorazon,
-            scale: escalaCorazon,
-            pointerEvents: "none",
+            fontFamily: "var(--font-heading)",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--parch-3)",
+            flexShrink: 0,
+            paddingTop: 2,
           }}
         >
-          ⭐
-        </motion.span>
-      )}
+          {String(indice + 1).padStart(2, "0")}.
+        </span>
 
-      <motion.article
-        layout
-        drag={onFavoritar ? "x" : false}
-        dragDirectionLock
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={{ left: 0, right: 0.55 }}
-        onDragEnd={alSoltar}
-        style={{ x }}
-        initial={{ opacity: 0, y: 14, rotate: 0 }}
-        animate={{ opacity: 1, y: 0, rotate: inclinacion }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        whileHover={{ rotate: 0, y: -3 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 340, damping: 28 }}
-        onClick={onClick}
-      >
-        <div
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-serif)",
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--ink)",
+              lineHeight: 1.3,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {anuncio.titulo}
+          </h3>
+          <p
+            style={{
+              margin: "1px 0 0",
+              fontFamily: "var(--font-serif)",
+              fontSize: 12,
+              fontStyle: "italic",
+              color: "var(--ink-3)",
+            }}
+          >
+            {anuncio.categoria}
+          </p>
+        </div>
+
+        {onGuardar && (
+          <button
+            onClick={alTocarPin}
+            aria-label={guardado ? "Quitar de favoritos" : "Guardar en favoritos"}
+            aria-pressed={guardado}
+            disabled={guardando}
+            style={{
+              flexShrink: 0,
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              border: `1.5px solid ${guardado ? "var(--red-andino)" : "var(--parch-3)"}`,
+              background: guardado ? "rgba(139,32,32,.08)" : "none",
+              fontSize: 15,
+              cursor: guardando ? "default" : "pointer",
+              opacity: guardando ? 0.6 : 1,
+            }}
+          >
+            📌
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--ink-2)" }}>
+          <span style={{ width: 16, textAlign: "center", fontSize: 13 }}>📍</span>
+          {anuncio.distrito}
+        </div>
+        {anuncio.salario && (
+          <div>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+                background: "rgba(30,107,52,.1)",
+                border: "1px solid rgba(30,107,52,.25)",
+                borderRadius: "var(--radius-pill)",
+                padding: "2px 10px",
+                fontSize: 12,
+                color: "var(--green)",
+                fontWeight: 600,
+              }}
+            >
+              💰 {anuncio.salario}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.();
+          }}
           style={{
-            position: "relative",
-            background: "var(--paper-raised)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius-card)",
-            boxShadow: "var(--shadow-pin)",
-            overflow: "hidden",
+            flex: 1,
+            border: "none",
+            background: "url('/assets/btn_tallado_dorado.webp') center / 100% 100% no-repeat",
+            color: "var(--brown)",
+            textShadow: "0 1px 1px rgba(255,255,255,.4)",
+            fontFamily: "var(--font-heading)",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            padding: "12px 0",
             cursor: "pointer",
           }}
         >
-          <FranjaAndina
-            color={indice % 2 === 0 ? "var(--terracota)" : "var(--marigold)"}
-          />
-
-          <div style={{ position: "relative", padding: "16px 16px 16px" }}>
-            <span
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                top: 4,
-                left: 14,
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: COLOR_PIN[anuncio.estado] ?? "var(--ink-soft)",
-              }}
-            />
-
-            <span
-              style={{
-                display: "inline-block",
-                fontFamily: "var(--font-body)",
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: "0.02em",
-                color: "var(--terracota-ink)",
-                background: "rgba(189, 79, 44, 0.14)",
-                borderRadius: 6,
-                padding: "3px 8px",
-                marginBottom: 10,
-              }}
-            >
-              {anuncio.categoria}
-            </span>
-
-            <h3
-              style={{
-                margin: "0 0 4px",
-                fontFamily: "var(--font-display)",
-                fontSize: 18,
-                fontWeight: 600,
-                lineHeight: 1.25,
-              }}
-            >
-              {anuncio.titulo}
-            </h3>
-
-            <p
-              style={{
-                margin: "0 0 10px",
-                fontSize: 14,
-                color: "var(--ink-soft)",
-                lineHeight: 1.4,
-              }}
-            >
-              {anuncio.descripcion}
-            </p>
-
-            <footer
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 12.5,
-                color: "var(--ink-soft)",
-              }}
-            >
-              <span>📍 {anuncio.distrito}</span>
-              <span>{anuncio.fecha}</span>
-            </footer>
-          </div>
-        </div>
-      </motion.article>
-    </div>
+          👁 Ver detalles
+        </button>
+        <button
+          onClick={postular}
+          style={{
+            flex: 1,
+            border: "none",
+            background: "url('/assets/btn_tallado_bronce.webp') center / 100% 100% no-repeat",
+            color: "var(--gold-3)",
+            textShadow: "0 1px 2px rgba(0,0,0,.5)",
+            fontFamily: "var(--font-heading)",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            padding: "12px 0",
+            cursor: "pointer",
+          }}
+        >
+          Postular
+        </button>
+      </div>
+    </motion.article>
   );
 }
