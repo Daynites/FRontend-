@@ -3,6 +3,20 @@ import { loginConGoogle } from "../api/client.js";
 
 const CLAVE_SESION = "junin_sesion";
 
+/**
+ * Lista de usuario_id con acceso al panel de Admin — igual al
+ * prototipo estático (ADMIN_IDS). Es un control de UI, no de
+ * seguridad real: cualquier endpoint de /admin/* debe validar el rol
+ * en el backend también, esto solo decide qué se muestra en pantalla.
+ * Migrar a un campo `es_admin` que venga del backend cuando Railway
+ * esté estable.
+ */
+const ADMIN_IDS = [1];
+
+export function esAdmin(sesion) {
+  return !!sesion && ADMIN_IDS.includes(sesion.usuarioId);
+}
+
 function leerSesionGuardada() {
   try {
     const cruda = localStorage.getItem(CLAVE_SESION);

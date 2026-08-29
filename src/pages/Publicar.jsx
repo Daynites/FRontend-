@@ -20,16 +20,10 @@ export default function Publicar() {
   if (!sesion) {
     return (
       <div style={{ padding: "48px 24px", textAlign: "center" }}>
-        <h2
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 20,
-            marginBottom: 6,
-          }}
-        >
+        <h2 style={{ fontFamily: "var(--font-heading)", fontSize: 20, marginBottom: 6 }}>
           Inicia sesión para publicar
         </h2>
-        <p style={{ color: "var(--ink-soft)", fontSize: 14, marginBottom: 24 }}>
+        <p style={{ color: "var(--ink-3)", fontSize: 14, marginBottom: 24 }}>
           Así podemos avisarte cuando tu anuncio sea aprobado.
         </p>
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -58,12 +52,6 @@ function FormularioAnuncio({ usuarioId }) {
   const actualizar = (campo) => (e) =>
     setDatos((prev) => ({ ...prev, [campo]: e.target.value }));
 
-  const elegirCategoria = (categoria) =>
-    setDatos((prev) => ({ ...prev, categoria }));
-
-  const elegirDistrito = (distrito) =>
-    setDatos((prev) => ({ ...prev, distrito }));
-
   const listoParaEnviar =
     datos.categoria && datos.distrito && datos.titulo.trim() && datos.descripcion.trim() && datos.whatsapp.trim();
 
@@ -88,103 +76,116 @@ function FormularioAnuncio({ usuarioId }) {
   }
 
   return (
-    <form onSubmit={enviar} style={{ padding: "16px 16px 32px" }}>
-      <header style={{ marginBottom: 18 }}>
-        <h1
+    <form onSubmit={enviar} style={{ padding: "14px 14px 32px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+        <span
           style={{
-            margin: "0 0 2px",
-            fontFamily: "var(--font-display)",
-            fontSize: 24,
-            fontWeight: 800,
+            fontFamily: "var(--font-heading)",
+            fontSize: 10,
+            letterSpacing: 2.5,
+            color: "var(--gold)",
+            textTransform: "uppercase",
           }}
         >
-          Publicar anuncio
-        </h1>
-        <p style={{ margin: 0, fontSize: 13, color: "var(--ink-soft)" }}>
-          Se revisa antes de publicarse — normalmente toma poco.
-        </p>
-      </header>
+          📢 Nuevo anuncio
+        </span>
+        <span style={{ flex: 1, height: 1, background: "linear-gradient(to right, var(--parch-3), transparent)" }} />
+      </div>
 
-      <Campo etiqueta="Categoría">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {categorias.map((cat) => (
-            <ChipSeleccion
-              key={cat}
-              activa={cat === datos.categoria}
-              onClick={() => elegirCategoria(cat)}
-            >
-              {cat}
-            </ChipSeleccion>
-          ))}
-        </div>
-      </Campo>
+      <div
+        style={{
+          background: "var(--parch-0)",
+          border: "1.5px solid var(--parch-2)",
+          borderRadius: "var(--radius-md)",
+          padding: 14,
+          marginBottom: 12,
+          boxShadow: "var(--shadow-sm)",
+        }}
+      >
+        <Campo etiqueta="Categoría">
+          <select style={estiloInput} value={datos.categoria} onChange={actualizar("categoria")} required>
+            <option value="" disabled>
+              Elige una categoría
+            </option>
+            {categorias.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </Campo>
 
-      <Campo etiqueta="Distrito">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {distritos.map((dist) => (
-            <ChipSeleccion
-              key={dist}
-              activa={dist === datos.distrito}
-              onClick={() => elegirDistrito(dist)}
-            >
-              {dist}
-            </ChipSeleccion>
-          ))}
-        </div>
-      </Campo>
+        <Campo etiqueta="Distrito">
+          <select style={estiloInput} value={datos.distrito} onChange={actualizar("distrito")} required>
+            <option value="" disabled>
+              Elige un distrito
+            </option>
+            {distritos.map((dist) => (
+              <option key={dist} value={dist}>
+                {dist}
+              </option>
+            ))}
+          </select>
+        </Campo>
 
-      <Campo etiqueta="Título">
-        <input
-          style={estiloInput}
-          value={datos.titulo}
-          onChange={actualizar("titulo")}
-          placeholder="Ej. Se busca soldador con experiencia"
-          maxLength={80}
-          required
-        />
-      </Campo>
+        <Campo etiqueta="Título del puesto">
+          <input
+            style={estiloInput}
+            value={datos.titulo}
+            onChange={actualizar("titulo")}
+            placeholder="Ej: Operario Minero, Mesero…"
+            maxLength={80}
+            required
+          />
+        </Campo>
 
-      <Campo etiqueta="Descripción">
-        <textarea
-          style={{ ...estiloInput, minHeight: 90, resize: "vertical" }}
-          value={datos.descripcion}
-          onChange={actualizar("descripcion")}
-          placeholder="Detalla en qué consiste, horario, condiciones…"
-          required
-        />
-      </Campo>
+        <Campo etiqueta="Descripción">
+          <textarea
+            style={{ ...estiloInput, height: 85, resize: "none" }}
+            value={datos.descripcion}
+            onChange={actualizar("descripcion")}
+            placeholder="Horario, beneficios, detalles…"
+            required
+          />
+        </Campo>
 
-      <Campo etiqueta="WhatsApp de contacto">
-        <input
-          style={estiloInput}
-          value={datos.whatsapp}
-          onChange={actualizar("whatsapp")}
-          placeholder="9XXXXXXXX"
-          inputMode="numeric"
-          required
-        />
-      </Campo>
+        <Campo etiqueta="Requisitos (opcional)">
+          <textarea
+            style={{ ...estiloInput, height: 70, resize: "none" }}
+            value={datos.requisitos}
+            onChange={actualizar("requisitos")}
+            placeholder="Experiencia, documentos…"
+          />
+        </Campo>
 
-      <Campo etiqueta="Requisitos (opcional)">
-        <input
-          style={estiloInput}
-          value={datos.requisitos}
-          onChange={actualizar("requisitos")}
-          placeholder="Ej. Con experiencia mínima de 1 año"
-        />
-      </Campo>
+        <Campo etiqueta="Salario (opcional)">
+          <input
+            style={estiloInput}
+            value={datos.salario}
+            onChange={actualizar("salario")}
+            placeholder="Ej: S/ 1,200 o Según convenio"
+          />
+        </Campo>
 
-      <Campo etiqueta="Salario (opcional)">
-        <input
-          style={estiloInput}
-          value={datos.salario}
-          onChange={actualizar("salario")}
-          placeholder="Ej. S/ 1200 - 1500"
-        />
-      </Campo>
+        <Campo etiqueta="WhatsApp de contacto" ultimo>
+          <input
+            style={estiloInput}
+            value={datos.whatsapp}
+            onChange={actualizar("whatsapp")}
+            placeholder="9XXXXXXXX"
+            inputMode="numeric"
+            required
+          />
+        </Campo>
+
+        {/* NOTA: el prototipo estático pide comprobante de pago acá
+            (sube a /anuncios/{id}/comprobante). No lo agregué todavía
+            porque no hay forma de confirmar que ese endpoint exista en
+            el backend con Railway caído — mejor no fingir que funciona. */}
+      </div>
 
       {error && (
-        <p style={{ color: "var(--berry)", fontSize: 13.5, marginTop: -6 }}>
+        <p style={{ color: "var(--red-andino)", fontSize: 13.5, marginTop: -4, marginBottom: 10 }}>
           No se pudo publicar: {error}
         </p>
       )}
@@ -195,19 +196,26 @@ function FormularioAnuncio({ usuarioId }) {
         whileTap={listoParaEnviar ? { scale: 0.98 } : {}}
         style={{
           width: "100%",
-          marginTop: 8,
-          padding: "13px 0",
-          borderRadius: 12,
           border: "none",
+          borderRadius: "var(--radius-pill)",
+          padding: 14,
+          color: "#fff",
+          fontFamily: "var(--font-heading)",
+          fontSize: 14,
           fontWeight: 700,
-          fontSize: 15,
-          color: "var(--paper)",
-          background: listoParaEnviar ? "var(--ink)" : "var(--line)",
+          letterSpacing: 1,
+          background: listoParaEnviar
+            ? "linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%)"
+            : "var(--parch-3)",
+          boxShadow: listoParaEnviar ? "0 4px 14px rgba(30,107,52,.3)" : "none",
           cursor: listoParaEnviar ? "pointer" : "not-allowed",
         }}
       >
-        {enviando ? "Publicando…" : "Publicar anuncio"}
+        {enviando ? "Publicando…" : "📢 Enviar para revisión"}
       </motion.button>
+      <p style={{ fontSize: 11.5, color: "var(--ink-3)", textAlign: "center", marginTop: 10 }}>
+        Tu anuncio será aprobado por el equipo Daynite antes de publicarse.
+      </p>
     </form>
   );
 }
@@ -228,8 +236,8 @@ function ConfirmacionEnvio({ onPublicarOtro }) {
           height: 56,
           margin: "0 auto 16px",
           borderRadius: "50%",
-          background: "var(--teal)",
-          color: "var(--paper)",
+          background: "var(--green)",
+          color: "#fff",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -238,22 +246,24 @@ function ConfirmacionEnvio({ onPublicarOtro }) {
       >
         ✓
       </motion.div>
-      <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, margin: "0 0 6px" }}>
+      <h2 style={{ fontFamily: "var(--font-heading)", fontSize: 20, margin: "0 0 6px" }}>
         Anuncio enviado
       </h2>
-      <p style={{ color: "var(--ink-soft)", fontSize: 14, marginBottom: 24 }}>
+      <p style={{ color: "var(--ink-3)", fontSize: 14, marginBottom: 24 }}>
         Está en revisión. Te avisamos apenas se apruebe.
       </p>
       <button
         onClick={onPublicarOtro}
         style={{
-          border: "1px solid var(--line)",
+          border: "1.5px solid var(--parch-3)",
           background: "transparent",
-          color: "var(--ink)",
-          borderRadius: 10,
+          color: "var(--ink-2)",
+          borderRadius: "var(--radius-pill)",
           padding: "10px 18px",
+          fontFamily: "var(--font-serif)",
           fontWeight: 600,
           fontSize: 14,
+          cursor: "pointer",
         }}
       >
         Publicar otro anuncio
@@ -262,16 +272,18 @@ function ConfirmacionEnvio({ onPublicarOtro }) {
   );
 }
 
-function Campo({ etiqueta, children }) {
+function Campo({ etiqueta, ultimo, children }) {
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: ultimo ? 0 : 10 }}>
       <label
         style={{
           display: "block",
-          fontSize: 12.5,
-          fontWeight: 600,
-          color: "var(--ink-soft)",
-          marginBottom: 6,
+          fontFamily: "var(--font-heading)",
+          fontSize: 9.5,
+          letterSpacing: 1.5,
+          color: "var(--gold)",
+          textTransform: "uppercase",
+          marginBottom: 5,
         }}
       >
         {etiqueta}
@@ -281,34 +293,14 @@ function Campo({ etiqueta, children }) {
   );
 }
 
-function ChipSeleccion({ activa, onClick, children }) {
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      whileTap={{ scale: 0.95 }}
-      style={{
-        border: `1px solid ${activa ? "var(--terracota-ink)" : "var(--line)"}`,
-        background: activa ? "rgba(189, 79, 44, 0.16)" : "transparent",
-        color: activa ? "var(--terracota-ink)" : "var(--ink-soft)",
-        borderRadius: 999,
-        padding: "6px 12px",
-        fontSize: 13,
-        fontWeight: 600,
-      }}
-    >
-      {children}
-    </motion.button>
-  );
-}
-
 const estiloInput = {
   width: "100%",
-  border: "1px solid var(--line)",
-  borderRadius: 10,
-  padding: "10px 12px",
-  fontSize: 14,
-  fontFamily: "var(--font-body)",
-  background: "var(--paper-raised)",
+  background: "#fff",
+  border: "1.5px solid var(--parch-2)",
+  borderRadius: "var(--radius-sm)",
+  padding: "9px 12px",
+  fontFamily: "var(--font-serif)",
+  fontSize: 13,
   color: "var(--ink)",
+  outline: "none",
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AppHeader from "./components/AppHeader.jsx";
 import BottomNav from "./components/BottomNav.jsx";
@@ -6,19 +6,29 @@ import Home from "./pages/Home.jsx";
 import Publicar from "./pages/Publicar.jsx";
 import Perfil from "./pages/Perfil.jsx";
 import Favoritos from "./pages/Favoritos.jsx";
+import Admin from "./pages/Admin.jsx";
 import AnuncioDetalle from "./pages/AnuncioDetalle.jsx";
 import { NavegacionProvider } from "./lib/navegacion.js";
+import { esAdmin, useSesion } from "./lib/auth.js";
 
 const PANTALLAS = {
   inicio: Home,
   favoritos: Favoritos,
   publicar: Publicar,
   perfil: Perfil,
+  admin: Admin,
 };
 
 export default function App() {
+  const { sesion } = useSesion();
+  const usuarioEsAdmin = esAdmin(sesion);
   const [pestana, setPestana] = useState("inicio");
   const [anuncioAbiertoId, setAnuncioAbiertoId] = useState(null);
+
+  // Por si cierra sesión (o cambia de cuenta) estando en Admin.
+  useEffect(() => {
+    if (pestana === "admin" && !usuarioEsAdmin) setPestana("inicio");
+  }, [pestana, usuarioEsAdmin]);
 
   const Pantalla = PANTALLAS[pestana];
 
@@ -49,12 +59,12 @@ export default function App() {
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.18 }}
               >
-                <Pantalla />
+                <Pantalla onCambiarPestana={setPestana} />
               </motion.div>
             )}
           </AnimatePresence>
         </main>
-        {!anuncioAbiertoId && <BottomNav activa={pestana} onCambiar={setPestana} />}
+        {!anuncioAbiertoId && <BottomNav activa={pestana} onCambiar={setPestana} mostrarAdmin={usuarioEsAdmin} />}
       </div>
     </NavegacionProvider>
   );

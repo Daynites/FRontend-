@@ -12,10 +12,13 @@ const TABS = [
   { id: "perfil", label: "Perfil", icono: "/assets/nav_perfil.webp" },
 ];
 
-export default function BottomNav({ activa, onCambiar }) {
-  const mitad = Math.ceil(TABS.length / 2);
-  const izquierda = TABS.slice(0, mitad);
-  const derecha = TABS.slice(mitad);
+export default function BottomNav({ activa, onCambiar, mostrarAdmin = false }) {
+  const tabs = mostrarAdmin
+    ? [...TABS, { id: "admin", label: "Admin", icono: "/assets/nav_admin.webp" }]
+    : TABS;
+  const mitad = Math.ceil(tabs.length / 2);
+  const izquierda = tabs.slice(0, mitad);
+  const derecha = tabs.slice(mitad);
 
   return (
     <nav
