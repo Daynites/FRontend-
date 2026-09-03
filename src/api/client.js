@@ -82,3 +82,49 @@ export function agregarFavorito(anuncioId) {
 export function quitarFavorito(anuncioId) {
   return pedirAutenticado(`/favoritos/${anuncioId}`, { method: "DELETE" });
 }
+
+/* ── Admin ────────────────────────────────────────────────────────
+   Igual que el resto de /admin/* en el prototipo estático: sin
+   validación real de rol vista desde el frontend. El backend debe
+   rechazar estas llamadas si quien las hace no es admin de verdad —
+   esto es solo la interfaz. */
+
+export function adminStats() {
+  return pedirAutenticado("/admin/stats");
+}
+
+export function adminPendientes() {
+  return pedirAutenticado("/admin/pendientes");
+}
+
+export function adminActivos() {
+  return pedirAutenticado("/admin/activos");
+}
+
+export function adminUsuarios(limite = 100) {
+  return pedirAutenticado(`/admin/usuarios?limite=${limite}`);
+}
+
+export function adminAprobar(id) {
+  return pedirAutenticado(`/admin/anuncios/${id}/aprobar`, { method: "POST" });
+}
+
+export function adminRechazar(id) {
+  return pedirAutenticado(`/admin/anuncios/${id}/rechazar`, { method: "POST" });
+}
+
+export function adminEliminarAnuncio(id) {
+  return pedirAutenticado(`/admin/anuncios/${id}`, { method: "DELETE" });
+}
+
+/** Devuelve un object URL de la imagen del comprobante (o null si no hay). */
+export async function adminVerComprobante(anuncioId) {
+  const token = obtenerToken();
+  const res = await fetch(`${BASE_URL}/admin/anuncios/${anuncioId}/comprobante`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Error ${res.status} al cargar el comprobante`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
