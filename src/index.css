@@ -61,19 +61,66 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
+html {
   height: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--parch-1) url("/assets/fondo_pergamino.webp") center / cover no-repeat fixed;
+  background: #17110a;
   color: var(--ink);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+}
+
+/**
+ * Marco de teléfono para trabajar cómodo en PC.
+ * En el celular real (pantallas angostas) esto no cambia nada — la
+ * app sigue a pantalla completa como siempre. Solo desde ~481px de
+ * ancho (tablet/desktop) se ve como un teléfono centrado, para no
+ * tener que estirar la ventana del navegador cada vez que probamos.
+ */
+.telefono-shell {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--parch-1) url("/assets/fondo_pergamino.webp") center / cover no-repeat fixed;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 481px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 0;
+  }
+
+  .telefono-shell {
+    width: 412px;
+    height: 890px;
+    min-height: 0;
+    border-radius: 44px;
+    border: 10px solid #0d0904;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Notch decorativo, para que se sienta como un teléfono de verdad */
+  .telefono-shell::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: block;
+    width: 120px;
+    height: 22px;
+    margin: 0 auto -22px;
+    background: #0d0904;
+    border-radius: 0 0 16px 16px;
+  }
 }
 
 button {
