@@ -6,7 +6,7 @@ import FranjaAndina from "./FranjaAndina.jsx";
  * a alertas y perfil. Migrado del prototipo estático — por ahora la
  * campana es solo visual (sin datos de notificaciones todavía).
  */
-export default function AppHeader({ onAbrirPerfil }) {
+export default function AppHeader({ onAbrirPerfil, onAbrirAlertas, hayNoLeidas }) {
   return (
     <header
       style={{
@@ -31,7 +31,26 @@ export default function AppHeader({ onAbrirPerfil }) {
           paddingTop: 6,
         }}
       >
-        <IconButton aria-label="Alertas">🔔</IconButton>
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <IconButton aria-label="Alertas" onClick={onAbrirAlertas}>
+            🔔
+          </IconButton>
+          {hayNoLeidas && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: -1,
+                right: -1,
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: "var(--red-andino)",
+                border: "1.5px solid var(--parch-0)",
+              }}
+            />
+          )}
+        </div>
 
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <div

@@ -8,6 +8,8 @@ import FranjaAndina from "./FranjaAndina.jsx";
  */
 const TABS = [
   { id: "inicio", label: "Inicio", icono: "/assets/nav_inicio.webp" },
+  { id: "mis-anuncios", label: "Mis Anuncios", icono: "/assets/nav_mis_anuncios.webp" },
+  { id: "candidatos", label: "Candidatos", icono: "/assets/nav_candidatos.webp" },
   { id: "favoritos", label: "Favoritos", emoji: "⭐" },
   { id: "perfil", label: "Perfil", icono: "/assets/nav_perfil.webp" },
 ];

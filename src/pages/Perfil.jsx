@@ -1,26 +1,17 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { eliminarAnuncio, misAnuncios } from "../api/client.js";
+import { misAnuncios } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import { abrirLink } from "../lib/links.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
 
-const ESTADO = {
-  pendiente: { color: "var(--gold)", texto: "En revisión" },
-  aprobado: { color: "var(--green)", texto: "Activo" },
-  rechazado: { color: "var(--red-andino)", texto: "Rechazado" },
-  expirado: { color: "var(--ink-3)", texto: "Expirado" },
-};
-
 /**
- * Menú de Perfil — migrado del prototipo estático. Algunas opciones
- * (Notificaciones push, Mi Perfil de Candidato, Buscar Candidatos,
- * Mis Alertas) todavía no tienen pantalla ni backend detrás; se
- * marcan como "Próximamente" en vez de fingir que funcionan.
+ * Menú de Perfil. "Mis Anuncios" y "Favoritos" ahora son tabs propias
+ * del bottom nav — acá solo se usan sus datos para las stats y se
+ * navega hacia ellas con onCambiarPestana.
  */
-export default function Perfil({ onCambiarPestana }) {
+export default function Perfil({ onCambiarPestana, onAbrirAlertas }) {
   const { sesion, iniciarSesionConCredential, cerrarSesion } = useSesion();
-  const [vista, setVista] = useState("menu"); // 'menu' | 'mis-anuncios'
   const [misAnunciosData, setMisAnunciosData] = useState(null);
   const [aviso, setAviso] = useState(null);
 
@@ -53,30 +44,6 @@ export default function Perfil({ onCambiarPestana }) {
         <div style={{ display: "flex", justifyContent: "center" }}>
           <BotonGoogle onCredential={iniciarSesionConCredential} />
         </div>
-      </div>
-    );
-  }
-
-  if (vista === "mis-anuncios") {
-    return (
-      <div style={{ padding: "14px 16px 32px" }}>
-        <BotonVolver onClick={() => setVista("menu")} />
-        <h2
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: 16,
-            fontWeight: 700,
-            margin: "10px 0 14px",
-            color: "var(--ink-2)",
-          }}
-        >
-          📢 Mis anuncios
-        </h2>
-        <ListaMisAnuncios
-          usuarioId={sesion.usuarioId}
-          anuncios={misAnunciosData}
-          onCambiar={setMisAnunciosData}
-        />
       </div>
     );
   }
@@ -165,12 +132,12 @@ export default function Perfil({ onCambiarPestana }) {
         <StatBox n="—" label="Alertas" />
       </div>
 
-      <MenuItem icono="📢" titulo="Mis Anuncios" sub="Ver y gestionar tus publicaciones" onClick={() => setVista("mis-anuncios")} />
+      <MenuItem icono="📢" titulo="Mis Anuncios" sub="Ver y gestionar tus publicaciones" onClick={() => onCambiarPestana?.("mis-anuncios")} />
       <MenuItem icono="🔔" titulo="Notificaciones push" sub="Próximamente" onClick={() => proximamente("Notificaciones push")} />
       <MenuItem icono="➡️" titulo="Favoritos" sub="Anuncios que guardaste" onClick={() => onCambiarPestana?.("favoritos")} />
-      <MenuItem icono="🪪" titulo="Mi Perfil de Candidato" sub="Próximamente" onClick={() => proximamente("Mi Perfil de Candidato")} />
-      <MenuItem icono="👥" titulo="Buscar Candidatos" sub="Próximamente" onClick={() => proximamente("Buscar Candidatos")} />
-      <MenuItem icono="🔔" titulo="Mis Alertas" sub="Próximamente" onClick={() => proximamente("Mis Alertas")} />
+      <MenuItem icono="🪪" titulo="Mi Perfil de Candidato" sub="Que las empresas te encuentren" onClick={() => onCambiarPestana?.("perfil-candidato")} />
+      <MenuItem icono="👥" titulo="Buscar Candidatos" sub="Ver quién busca trabajo" onClick={() => onCambiarPestana?.("candidatos")} />
+      <MenuItem icono="🔔" titulo="Mis Alertas" sub="Categorías que sigues" onClick={onAbrirAlertas} />
       <MenuItem icono="🆘" titulo="Soporte Daynite" sub="Contactar al equipo" onClick={() => abrirLink("https://wa.me/51920881860")} />
       <MenuItem
         icono="🚪"
@@ -181,29 +148,6 @@ export default function Perfil({ onCambiarPestana }) {
         }}
       />
     </div>
-  );
-}
-
-function BotonVolver({ onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        border: "none",
-        background: "none",
-        color: "var(--brown-2)",
-        fontFamily: "var(--font-serif)",
-        fontSize: 14,
-        fontWeight: 600,
-        padding: 0,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-      }}
-    >
-      ‹ Volver
-    </button>
   );
 }
 
@@ -251,92 +195,5 @@ function MenuItem({ icono, titulo, sub, onClick }) {
       </div>
       <div style={{ fontSize: 18, color: "var(--parch-3)", flexShrink: 0 }}>›</div>
     </motion.div>
-  );
-}
-
-function ListaMisAnuncios({ usuarioId, anuncios, onCambiar }) {
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (anuncios !== null) return;
-    misAnuncios(usuarioId)
-      .then((d) => onCambiar(d.anuncios))
-      .catch((e) => setError(e.message));
-  }, [usuarioId, anuncios, onCambiar]);
-
-  async function borrar(anuncioId) {
-    const anteriores = anuncios;
-    onCambiar(anuncios.filter((a) => a.id !== anuncioId));
-    try {
-      await eliminarAnuncio(anuncioId, usuarioId);
-    } catch {
-      onCambiar(anteriores);
-    }
-  }
-
-  if (error) {
-    return <p style={{ color: "var(--red-andino)", fontSize: 14 }}>No se pudo cargar tu lista: {error}</p>;
-  }
-
-  if (anuncios === null) {
-    return <p style={{ color: "var(--ink-3)", fontSize: 14 }}>Cargando…</p>;
-  }
-
-  if (anuncios.length === 0) {
-    return <p style={{ color: "var(--ink-3)", fontSize: 14 }}>Todavía no publicaste ningún anuncio.</p>;
-  }
-
-  return (
-    <div style={{ display: "grid", gap: 10 }}>
-      <AnimatePresence>
-        {anuncios.map((anuncio) => (
-          <MiAnuncioItem key={anuncio.id} anuncio={anuncio} onBorrar={borrar} />
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function MiAnuncioItem({ anuncio, onBorrar }) {
-  const estado = ESTADO[anuncio.estado] ?? { color: "var(--ink-3)", texto: anuncio.estado };
-
-  return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -24, transition: { duration: 0.15 } }}
-      style={{
-        background: "var(--parch-0)",
-        border: "1.5px solid var(--parch-2)",
-        borderRadius: 12,
-        padding: "12px 14px",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-        <h3 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: 15, fontWeight: 600, lineHeight: 1.3 }}>
-          {anuncio.titulo}
-        </h3>
-        <span style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 700, color: estado.color }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: estado.color }} />
-          {estado.texto}
-        </span>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
-        <span>
-          👁 {anuncio.vistas} vista{anuncio.vistas === 1 ? "" : "s"}
-          {anuncio.estado === "aprobado" && anuncio.dias_restantes !== null && (
-            <> · {anuncio.dias_restantes} día{anuncio.dias_restantes === 1 ? "" : "s"} restantes</>
-          )}
-        </span>
-        <button
-          onClick={() => onBorrar(anuncio.id)}
-          style={{ border: "none", background: "none", color: "var(--red-andino)", fontSize: 12, fontWeight: 600, padding: 4, cursor: "pointer" }}
-        >
-          Eliminar
-        </button>
-      </div>
-    </motion.article>
   );
 }

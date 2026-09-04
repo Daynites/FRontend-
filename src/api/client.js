@@ -83,6 +83,61 @@ export function quitarFavorito(anuncioId) {
   return pedirAutenticado(`/favoritos/${anuncioId}`, { method: "DELETE" });
 }
 
+/* ── Candidatos ───────────────────────────────────────────────── */
+
+export function obtenerPerfilCandidato(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/perfil`);
+}
+
+export function guardarPerfilCandidato(usuarioId, datos) {
+  return pedir(`/usuarios/${usuarioId}/perfil`, {
+    method: "POST",
+    body: JSON.stringify({ usuario_id: usuarioId, ...datos }),
+  });
+}
+
+export function listarCandidatos(categoria) {
+  return pedir(`/candidatos?categoria=${encodeURIComponent(categoria)}`);
+}
+
+/* ── Alertas y notificaciones ─────────────────────────────────── */
+
+export function listarNotificaciones(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/notificaciones`);
+}
+
+export function marcarNotificacionesLeidas(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/notificaciones/leer`, { method: "POST" });
+}
+
+export function listarAlertas(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/alertas`);
+}
+
+export function agregarAlerta(usuarioId, categoria) {
+  return pedir(`/usuarios/${usuarioId}/alertas?categoria=${encodeURIComponent(categoria)}`, {
+    method: "POST",
+  });
+}
+
+export function eliminarAlerta(usuarioId, alertaId) {
+  return pedir(`/usuarios/${usuarioId}/alertas/${alertaId}`, { method: "DELETE" });
+}
+
+/** Sube la imagen del comprobante de pago para un anuncio recién creado. */
+export async function subirComprobante(anuncioId, archivo) {
+  const token = obtenerToken();
+  const formData = new FormData();
+  formData.append("archivo", archivo);
+  const res = await fetch(`${BASE_URL}/anuncios/${anuncioId}/comprobante`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Error ${res.status} al subir el comprobante`);
+  return true;
+}
+
 /* ── Admin ────────────────────────────────────────────────────────
    Igual que el resto de /admin/* en el prototipo estático: sin
    validación real de rol vista desde el frontend. El backend debe
