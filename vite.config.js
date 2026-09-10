@@ -30,11 +30,34 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precachea el shell de la app (JS/CSS/HTML del build) para que
-        // abra offline. Los anuncios en sí necesitan red — eso se maneja
-        // aparte con runtimeCaching abajo, no como parte del shell.
-        globPatterns: ["**/*.{js,css,html,png,svg}"],
+        // Precachea el shell de la app (JS/CSS/HTML/imágenes del build)
+        // para que abra offline y no vuelva a pedir estos archivos en
+        // cada visita. OJO: incluye webp — los 12 assets del diseño
+        // (fondos, botones tallados, íconos del nav) son todos webp,
+        // si se te olvida agregarlo acá no se cachean y cada carga los
+        // vuelve a pedir a la red.
+        globPatterns: ["**/*.{js,css,html,png,svg,webp,ico}"],
         runtimeCaching: [
+          {
+            // Fuentes de Google — nunca cambian para una misma URL,
+            // así que van con CacheFirst (usa la caché sin ni
+            // preguntarle a la red) y expiran recién al año.
+            urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-css",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          {
+            urlPattern: ({ url }) => url.origin === "https://fonts.gstatic.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-files",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             // Llamadas al backend (Railway) — network-first: intenta traer
             // datos frescos, y si no hay red, sirve la última respuesta
