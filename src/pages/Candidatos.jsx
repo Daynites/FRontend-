@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { listarCandidatos, listarCategorias } from "../api/client.js";
 import { abrirLink } from "../lib/links.js";
+import { SkeletonLinea, SkeletonLista } from "../components/Skeleton.jsx";
 
 export default function Candidatos() {
   const [categorias, setCategorias] = useState([]);
@@ -99,11 +100,7 @@ export default function Candidatos() {
         <MensajeVacio icono="⚠️" titulo="Error" sub={error} />
       )}
 
-      {categoria && candidatos === undefined && !error && (
-        <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>
-          Buscando candidatos…
-        </p>
-      )}
+      {categoria && candidatos === undefined && !error && <SkeletonLista n={3} Componente={SkeletonLinea} />}
 
       {categoria && candidatos && candidatos.length === 0 && (
         <MensajeVacio icono="👤" titulo="Sin candidatos" sub="No hay perfiles para esta categoría aún." />

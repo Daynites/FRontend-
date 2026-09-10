@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import AnuncioCard from "../components/AnuncioCard.jsx";
+import { SkeletonLista } from "../components/Skeleton.jsx";
 import { listarFavoritos, quitarFavorito } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import { useNavegacion } from "../lib/navegacion.js";
@@ -65,9 +66,7 @@ export default function Favoritos() {
         <p style={{ color: "var(--red-andino)", fontSize: 14 }}>No se pudo cargar tu lista: {error}</p>
       )}
 
-      {anuncios === null && !error && (
-        <p style={{ color: "var(--ink-3)", fontSize: 14 }}>Cargando…</p>
-      )}
+      {anuncios === null && !error && <SkeletonLista n={3} />}
 
       {anuncios && anuncios.length === 0 && (
         <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>

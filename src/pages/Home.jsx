@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AnuncioCard from "../components/AnuncioCard.jsx";
+import { SkeletonLista } from "../components/Skeleton.jsx";
 import { agregarFavorito, listarAnuncios, listarCategorias, listarDistritos, quitarFavorito } from "../api/client.js";
 import { useNavegacion } from "../lib/navegacion.js";
 import { useSesion } from "../lib/auth.js";
@@ -173,6 +174,8 @@ export default function Home() {
         </p>
       )}
 
+      {cargando && anuncios.length === 0 && <SkeletonLista n={3} />}
+
       {!cargando && anuncios.length === 0 && !error && (
         <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>
           No hay anuncios con este filtro todavía.
@@ -245,7 +248,8 @@ function BarraBusqueda({ valor, onCambiar }) {
 
 function FiltroPill({ activa, onClick, children }) {
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.94 }}
       onClick={onClick}
       style={{
         flexShrink: 0,
@@ -262,7 +266,7 @@ function FiltroPill({ activa, onClick, children }) {
       }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }
 
@@ -280,7 +284,8 @@ function FiltroDropdown({ label, abierto, onToggle, onCerrar, alinearDerecha, ch
 
   return (
     <div ref={ref} style={{ position: "relative", flexShrink: 0 }}>
-      <button
+      <motion.button
+        whileTap={{ scale: 0.94 }}
         onClick={onToggle}
         style={{
           background: "var(--brown)",
@@ -295,7 +300,7 @@ function FiltroDropdown({ label, abierto, onToggle, onCerrar, alinearDerecha, ch
         }}
       >
         {label}
-      </button>
+      </motion.button>
       <AnimatePresence>
         {abierto && (
           <motion.div

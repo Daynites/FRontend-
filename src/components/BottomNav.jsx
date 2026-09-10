@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import FranjaAndina from "./FranjaAndina.jsx";
 
 /**
@@ -45,9 +46,12 @@ export default function BottomNav({ activa, onCambiar, mostrarAdmin = false }) {
         ))}
 
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          <button
+          <motion.button
             onClick={() => onCambiar("publicar")}
             aria-label="Publicar anuncio"
+            whileTap={{ scale: 0.88 }}
+            animate={activa === "publicar" ? { scale: [1, 1.08, 1] } : {}}
+            transition={{ duration: 0.35 }}
             style={{
               width: 52,
               height: 52,
@@ -64,7 +68,7 @@ export default function BottomNav({ activa, onCambiar, mostrarAdmin = false }) {
             }}
           >
             ⚡
-          </button>
+          </motion.button>
         </div>
 
         {derecha.map((tab) => (
@@ -80,6 +84,7 @@ function NavItem({ tab, activa, onClick }) {
     <button
       onClick={onClick}
       style={{
+        position: "relative",
         flex: 1,
         display: "flex",
         flexDirection: "column",
@@ -89,30 +94,52 @@ function NavItem({ tab, activa, onClick }) {
         border: "none",
         padding: "4px 0",
         cursor: "pointer",
-        opacity: activa ? 1 : 0.45,
       }}
     >
-      {tab.icono ? (
-        <img
-          src={tab.icono}
-          alt=""
+      {activa && (
+        <motion.div
+          layoutId="nav-pill"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
           style={{
-            width: 40,
-            height: 40,
-            objectFit: "contain",
-            marginTop: -6,
-            filter: "drop-shadow(0 2px 5px rgba(30,15,0,.6))",
+            position: "absolute",
+            top: -2,
+            width: 34,
+            height: 34,
+            borderRadius: "50%",
+            background: "rgba(196,154,40,.18)",
           }}
         />
-      ) : (
-        <span style={{ fontSize: 20 }}>{tab.emoji}</span>
       )}
+      <motion.div
+        animate={{ scale: activa ? 1 : 1, opacity: activa ? 1 : 0.45 }}
+        whileTap={{ scale: 0.85 }}
+        style={{ position: "relative", zIndex: 1 }}
+      >
+        {tab.icono ? (
+          <img
+            src={tab.icono}
+            alt=""
+            style={{
+              width: 40,
+              height: 40,
+              objectFit: "contain",
+              marginTop: -6,
+              filter: "drop-shadow(0 2px 5px rgba(30,15,0,.6))",
+            }}
+          />
+        ) : (
+          <span style={{ fontSize: 20, display: "block" }}>{tab.emoji}</span>
+        )}
+      </motion.div>
       <span
         style={{
+          position: "relative",
+          zIndex: 1,
           fontFamily: "var(--font-heading)",
           fontSize: 8,
           letterSpacing: 1,
           textTransform: "uppercase",
+          opacity: activa ? 1 : 0.45,
           color: activa ? "var(--brown)" : "var(--ink-3)",
         }}
       >

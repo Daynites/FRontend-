@@ -45,7 +45,12 @@ export default function AnuncioCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       whileTap={{ scale: 0.985 }}
-      transition={{ type: "spring", stiffness: 340, damping: 30 }}
+      transition={{
+        type: "spring",
+        stiffness: 340,
+        damping: 30,
+        delay: Math.min(indice, 8) * 0.045,
+      }}
       onClick={onClick}
       style={{
         position: "relative",

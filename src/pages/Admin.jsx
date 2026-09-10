@@ -10,6 +10,7 @@ import {
   adminUsuarios,
   adminVerComprobante,
 } from "../api/client.js";
+import { SkeletonLinea, SkeletonLista } from "../components/Skeleton.jsx";
 
 const TABS = [
   { id: "stats", label: "📊 Stats" },
@@ -401,7 +402,12 @@ function BotonAdmin({ children, onClick, variante }) {
 }
 
 function Cargando({ texto }) {
-  return <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>{texto}</p>;
+  return (
+    <div>
+      <p style={{ color: "var(--ink-3)", fontSize: 12, marginBottom: 8 }}>{texto}</p>
+      <SkeletonLista n={3} Componente={SkeletonLinea} />
+    </div>
+  );
 }
 
 function MensajeError({ texto }) {

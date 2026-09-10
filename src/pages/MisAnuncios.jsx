@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { eliminarAnuncio, misAnuncios } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
+import { SkeletonLinea, SkeletonLista } from "../components/Skeleton.jsx";
 
 const ESTADO = {
   pendiente: { color: "var(--gold)", texto: "En revisión" },
@@ -72,7 +73,7 @@ export default function MisAnuncios() {
 
       {error && <p style={{ color: "var(--red-andino)", fontSize: 14 }}>No se pudo cargar tu lista: {error}</p>}
 
-      {anuncios === null && !error && <p style={{ color: "var(--ink-3)", fontSize: 14 }}>Cargando…</p>}
+      {anuncios === null && !error && <SkeletonLista n={3} Componente={SkeletonLinea} />}
 
       {anuncios && anuncios.length === 0 && (
         <p style={{ color: "var(--ink-3)", fontSize: 14, textAlign: "center", padding: "24px 0" }}>
