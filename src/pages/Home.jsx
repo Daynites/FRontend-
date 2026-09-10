@@ -189,7 +189,7 @@ export default function Home() {
               key={anuncio.id}
               anuncio={anuncio}
               indice={i}
-              onClick={() => abrirAnuncio(anuncio.id)}
+              onClick={() => abrirAnuncio(anuncio)}
               onGuardar={alGuardar}
             />
           ))}

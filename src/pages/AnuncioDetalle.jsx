@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { obtenerAnuncio } from "../api/client.js";
 import { abrirLink, linkWhatsapp } from "../lib/links.js";
+import { SkeletonLinea } from "../components/Skeleton.jsx";
 
 const ESTADO = {
   pendiente: { color: "var(--gold)", texto: "En revisión" },
@@ -10,17 +11,23 @@ const ESTADO = {
   expirado: { color: "var(--ink-3)", texto: "Expirado" },
 };
 
-export default function AnuncioDetalle({ anuncioId, onVolver }) {
-  const [anuncio, setAnuncio] = useState(null);
+export default function AnuncioDetalle({ anuncioId, preview, onVolver }) {
+  const [anuncio, setAnuncio] = useState(preview); // datos completos (null hasta que llegue el fetch)
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setAnuncio(null);
     setError(null);
     obtenerAnuncio(anuncioId)
       .then(setAnuncio)
       .catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anuncioId]);
+
+  // Mientras solo tenemos el preview (título/categoría de la tarjeta),
+  // el resto de campos (descripción, requisitos, fecha…) todavía no
+  // llegaron — se muestran con skeleton hasta que el fetch completo
+  // resuelva y "anuncio" tenga esos campos.
+  const cargaCompleta = anuncio && "descripcion" in anuncio;
 
   function contactar() {
     const mensaje = `Hola, vi tu anuncio "${anuncio.titulo}" en Junín Anuncios y me interesa.`;
@@ -38,7 +45,9 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
       )}
 
       {!anuncio && !error && (
-        <p style={{ padding: 16, color: "var(--ink-3)", fontSize: 14 }}>Cargando…</p>
+        <div style={{ padding: 16 }}>
+          <SkeletonLinea />
+        </div>
       )}
 
       {anuncio && (
@@ -47,7 +56,10 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
           animate={{ opacity: 1, y: 0 }}
           style={{ flex: 1, paddingBottom: 100 }}
         >
-          {/* Hero — mismo estilo que .modal-hero del prototipo */}
+          {/* Hero — mismo estilo que .modal-hero del prototipo. El
+              título y la categoría comparten layoutId con la tarjeta
+              que abrió este detalle, así "vuelan" hasta acá en vez de
+              solo aparecer. */}
           <div
             style={{
               position: "relative",
@@ -70,7 +82,8 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
                   "repeating-linear-gradient(to bottom, var(--gold) 0px, var(--gold) 6px, var(--red-andino) 6px, var(--red-andino) 12px)",
               }}
             />
-            <div
+            <motion.div
+              layoutId={`categoria-${anuncioId}`}
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: 9,
@@ -81,8 +94,9 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
               }}
             >
               {anuncio.categoria}
-            </div>
-            <h1
+            </motion.div>
+            <motion.h1
+              layoutId={`titulo-${anuncioId}`}
               style={{
                 margin: 0,
                 fontFamily: "var(--font-heading)",
@@ -93,7 +107,7 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
               }}
             >
               {anuncio.titulo}
-            </h1>
+            </motion.h1>
             {ESTADO[anuncio.estado] && (
               <div
                 style={{
@@ -113,22 +127,29 @@ export default function AnuncioDetalle({ anuncioId, onVolver }) {
           <div style={{ padding: "0 14px" }}>
             <InfoRow icono="📍" etiqueta="Distrito" valor={anuncio.distrito} />
             {anuncio.salario && <InfoRow icono="💰" etiqueta="Salario" valor={anuncio.salario} />}
-            <InfoRow icono="📅" etiqueta="Publicado" valor={anuncio.fecha} ultimo />
 
-            <SecLabel>📝 Descripción</SecLabel>
-            <DescBox>{anuncio.descripcion}</DescBox>
-
-            {anuncio.requisitos && (
+            {cargaCompleta ? (
               <>
-                <SecLabel>✅ Requisitos</SecLabel>
-                <DescBox>{anuncio.requisitos}</DescBox>
+                <InfoRow icono="📅" etiqueta="Publicado" valor={anuncio.fecha} ultimo />
+                <SecLabel>📝 Descripción</SecLabel>
+                <DescBox>{anuncio.descripcion}</DescBox>
+                {anuncio.requisitos && (
+                  <>
+                    <SecLabel>✅ Requisitos</SecLabel>
+                    <DescBox>{anuncio.requisitos}</DescBox>
+                  </>
+                )}
               </>
+            ) : (
+              <div style={{ marginTop: 12 }}>
+                <SkeletonLinea />
+              </div>
             )}
           </div>
         </motion.div>
       )}
 
-      {anuncio && (
+      {anuncio && anuncio.whatsapp && (
         <div
           style={{
             position: "sticky",

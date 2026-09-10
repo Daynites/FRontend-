@@ -76,7 +76,8 @@ export default function AnuncioCard({
         </span>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3
+          <motion.h3
+            layoutId={`titulo-${anuncio.id}`}
             style={{
               margin: 0,
               fontFamily: "var(--font-serif)",
@@ -91,8 +92,9 @@ export default function AnuncioCard({
             }}
           >
             {anuncio.titulo}
-          </h3>
-          <p
+          </motion.h3>
+          <motion.p
+            layoutId={`categoria-${anuncio.id}`}
             style={{
               margin: "1px 0 0",
               fontFamily: "var(--font-serif)",
@@ -102,7 +104,7 @@ export default function AnuncioCard({
             }}
           >
             {anuncio.categoria}
-          </p>
+          </motion.p>
         </div>
 
         {onGuardar && (

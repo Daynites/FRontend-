@@ -32,7 +32,7 @@ export default function App() {
   const { sesion } = useSesion();
   const usuarioEsAdmin = esAdmin(sesion);
   const [pestana, setPestana] = useState("inicio");
-  const [anuncioAbiertoId, setAnuncioAbiertoId] = useState(null);
+  const [anuncioAbierto, setAnuncioAbierto] = useState(null); // { id, preview } | null
   const [alertasAbiertas, setAlertasAbiertas] = useState(false);
   const [hayNoLeidas, setHayNoLeidas] = useState(false);
   const [mostrarSplash, setMostrarSplash] = useState(true);
@@ -62,9 +62,16 @@ export default function App() {
   const Pantalla = PANTALLAS[pestana];
 
   return (
-    <NavegacionProvider value={{ abrirAnuncio: setAnuncioAbiertoId }}>
+    <NavegacionProvider
+      value={{
+        abrirAnuncio: (anuncioOrId) =>
+          setAnuncioAbierto(
+            typeof anuncioOrId === "object" ? { id: anuncioOrId.id, preview: anuncioOrId } : { id: anuncioOrId, preview: null }
+          ),
+      }}
+    >
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
-        {!anuncioAbiertoId && (
+        {!anuncioAbierto && (
           <AppHeader
             onAbrirPerfil={() => setPestana("perfil")}
             onAbrirAlertas={() => {
@@ -79,8 +86,8 @@ export default function App() {
           />
         )}
         <main style={{ flex: 1 }}>
-          <AnimatePresence mode="wait">
-            {anuncioAbiertoId ? (
+          <AnimatePresence mode="popLayout">
+            {anuncioAbierto ? (
               <motion.div
                 key="detalle"
                 initial={{ opacity: 0, x: 24 }}
@@ -89,8 +96,9 @@ export default function App() {
                 transition={{ duration: 0.2 }}
               >
                 <AnuncioDetalle
-                  anuncioId={anuncioAbiertoId}
-                  onVolver={() => setAnuncioAbiertoId(null)}
+                  anuncioId={anuncioAbierto.id}
+                  preview={anuncioAbierto.preview}
+                  onVolver={() => setAnuncioAbierto(null)}
                 />
               </motion.div>
             ) : (
@@ -106,14 +114,14 @@ export default function App() {
             )}
           </AnimatePresence>
         </main>
-        {!anuncioAbiertoId && <BottomNav activa={pestana} onCambiar={setPestana} mostrarAdmin={usuarioEsAdmin} />}
+        {!anuncioAbierto && <BottomNav activa={pestana} onCambiar={setPestana} mostrarAdmin={usuarioEsAdmin} />}
       </div>
 
       <AnimatePresence>
         {alertasAbiertas && (
           <AlertasOverlay
             onCerrar={() => setAlertasAbiertas(false)}
-            onAbrirAnuncio={(id) => setAnuncioAbiertoId(id)}
+            onAbrirAnuncio={(id) => setAnuncioAbierto({ id, preview: null })}
           />
         )}
       </AnimatePresence>
