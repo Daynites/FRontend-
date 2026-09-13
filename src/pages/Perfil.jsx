@@ -11,7 +11,7 @@ import { guardarFotoPerfil, leerFotoPerfil } from "../lib/fotoPerfil.js";
  * del bottom nav — acá solo se usan sus datos para las stats y se
  * navega hacia ellas con onCambiarPestana.
  */
-export default function Perfil({ onCambiarPestana, onAbrirAlertas }) {
+export default function Perfil({ onCambiarPestana, onAbrirAlertas, puedeVerCandidatos }) {
   const { sesion, iniciarSesionConCredential, cerrarSesion } = useSesion();
   const [misAnunciosData, setMisAnunciosData] = useState(null);
   const [aviso, setAviso] = useState(null);
@@ -122,7 +122,9 @@ export default function Perfil({ onCambiarPestana, onAbrirAlertas }) {
       <MenuItem icono="🔔" titulo="Notificaciones push" sub="Próximamente" onClick={() => proximamente("Notificaciones push")} />
       <MenuItem icono="➡️" titulo="Favoritos" sub="Anuncios que guardaste" onClick={() => onCambiarPestana?.("favoritos")} />
       <MenuItem icono="🪪" titulo="Mi Perfil de Candidato" sub="Que las empresas te encuentren" onClick={() => onCambiarPestana?.("perfil-candidato")} />
-      <MenuItem icono="👥" titulo="Buscar Candidatos" sub="Ver quién busca trabajo" onClick={() => onCambiarPestana?.("candidatos")} />
+      {puedeVerCandidatos && (
+        <MenuItem icono="👥" titulo="Buscar Candidatos" sub="Ver quién busca trabajo" onClick={() => onCambiarPestana?.("candidatos")} />
+      )}
       <MenuItem icono="🔔" titulo="Mis Alertas" sub="Categorías que sigues" onClick={onAbrirAlertas} />
       <MenuItem icono="🆘" titulo="Soporte Daynite" sub="Contactar al equipo" onClick={() => abrirLink("https://wa.me/51920881860")} />
       <MenuItem

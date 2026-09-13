@@ -7,18 +7,25 @@ import FranjaAndina from "./FranjaAndina.jsx";
  * ilustrado para ese caso. Se usa un emoji ⭐ como marcador temporal
  * hasta contar con un asset dedicado.
  */
-const TABS = [
+const TABS_BASE = [
   { id: "inicio", label: "Inicio", icono: "/assets/nav_inicio.webp" },
   { id: "mis-anuncios", label: "Mis Anuncios", icono: "/assets/nav_mis_anuncios.webp" },
-  { id: "candidatos", label: "Candidatos", icono: "/assets/nav_candidatos.webp" },
   { id: "favoritos", label: "Favoritos", emoji: "⭐" },
   { id: "perfil", label: "Perfil", icono: "/assets/nav_perfil.webp" },
 ];
 
-export default function BottomNav({ activa, onCambiar, mostrarAdmin = false }) {
-  const tabs = mostrarAdmin
-    ? [...TABS, { id: "admin", label: "Admin", icono: "/assets/nav_admin.webp" }]
-    : TABS;
+export default function BottomNav({ activa, onCambiar, mostrarAdmin = false, mostrarCandidatos = false }) {
+  // "Candidatos" es una herramienta para quien contrata (necesita al
+  // menos un anuncio aprobado), no para todo el mundo — se inserta
+  // después de "Mis Anuncios" solo si corresponde.
+  let tabs = mostrarCandidatos
+    ? [
+        ...TABS_BASE.slice(0, 2),
+        { id: "candidatos", label: "Candidatos", icono: "/assets/nav_candidatos.webp" },
+        ...TABS_BASE.slice(2),
+      ]
+    : TABS_BASE;
+  if (mostrarAdmin) tabs = [...tabs, { id: "admin", label: "Admin", icono: "/assets/nav_admin.webp" }];
   const mitad = Math.ceil(tabs.length / 2);
   const izquierda = tabs.slice(0, mitad);
   const derecha = tabs.slice(mitad);

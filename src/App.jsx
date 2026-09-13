@@ -7,7 +7,7 @@ import AlertasOverlay from "./components/AlertasOverlay.jsx";
 import SplashScreen, { DURACION_MINIMA_MS } from "./components/SplashScreen.jsx";
 import { NavegacionProvider } from "./lib/navegacion.js";
 import { esAdmin, useSesion } from "./lib/auth.js";
-import { listarNotificaciones } from "./api/client.js";
+import { listarNotificaciones, misAnuncios } from "./api/client.js";
 import { SkeletonLista } from "./components/Skeleton.jsx";
 
 // Home se queda "eager" (es la pantalla de entrada, no tiene sentido
@@ -42,6 +42,20 @@ export default function App() {
   const [alertasAbiertas, setAlertasAbiertas] = useState(false);
   const [hayNoLeidas, setHayNoLeidas] = useState(false);
   const [mostrarSplash, setMostrarSplash] = useState(true);
+  const [puedeVerCandidatos, setPuedeVerCandidatos] = useState(false);
+
+  // "Candidatos" es una herramienta para quien contrata, no para quien
+  // busca trabajo — solo se muestra a quienes ya tienen al menos un
+  // anuncio APROBADO (no cuentan pendientes/rechazados/expirados).
+  useEffect(() => {
+    if (!sesion) {
+      setPuedeVerCandidatos(false);
+      return;
+    }
+    misAnuncios(sesion.usuarioId)
+      .then((d) => setPuedeVerCandidatos(d.anuncios.some((a) => a.estado === "aprobado")))
+      .catch(() => setPuedeVerCandidatos(false));
+  }, [sesion]);
 
   useEffect(() => {
     const t = setTimeout(() => setMostrarSplash(false), DURACION_MINIMA_MS);
@@ -60,10 +74,11 @@ export default function App() {
       .catch(() => {});
   }, [sesion]);
 
-  // Por si cierra sesión (o cambia de cuenta) estando en Admin.
+  // Por si cierra sesión (o cambia de cuenta) estando en Admin o Candidatos.
   useEffect(() => {
     if (pestana === "admin" && !usuarioEsAdmin) setPestana("inicio");
-  }, [pestana, usuarioEsAdmin]);
+    if (pestana === "candidatos" && !puedeVerCandidatos) setPestana("inicio");
+  }, [pestana, usuarioEsAdmin, puedeVerCandidatos]);
 
   const Pantalla = PANTALLAS[pestana];
 
@@ -116,13 +131,24 @@ export default function App() {
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.18 }}
               >
-                <Pantalla onCambiarPestana={setPestana} onAbrirAlertas={() => setAlertasAbiertas(true)} />
+                <Pantalla
+                  onCambiarPestana={setPestana}
+                  onAbrirAlertas={() => setAlertasAbiertas(true)}
+                  puedeVerCandidatos={puedeVerCandidatos}
+                />
               </motion.div>
             )}
           </AnimatePresence>
           </Suspense>
         </main>
-        {!anuncioAbierto && <BottomNav activa={pestana} onCambiar={setPestana} mostrarAdmin={usuarioEsAdmin} />}
+        {!anuncioAbierto && (
+          <BottomNav
+            activa={pestana}
+            onCambiar={setPestana}
+            mostrarAdmin={usuarioEsAdmin}
+            mostrarCandidatos={puedeVerCandidatos}
+          />
+        )}
       </div>
 
       <AnimatePresence>
