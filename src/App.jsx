@@ -1,21 +1,27 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import AppHeader from "./components/AppHeader.jsx";
 import BottomNav from "./components/BottomNav.jsx";
 import Home from "./pages/Home.jsx";
-import Publicar from "./pages/Publicar.jsx";
-import Perfil from "./pages/Perfil.jsx";
-import Favoritos from "./pages/Favoritos.jsx";
-import MisAnuncios from "./pages/MisAnuncios.jsx";
-import Candidatos from "./pages/Candidatos.jsx";
-import MiPerfilCandidato from "./pages/MiPerfilCandidato.jsx";
-import Admin from "./pages/Admin.jsx";
-import AnuncioDetalle from "./pages/AnuncioDetalle.jsx";
 import AlertasOverlay from "./components/AlertasOverlay.jsx";
 import SplashScreen, { DURACION_MINIMA_MS } from "./components/SplashScreen.jsx";
 import { NavegacionProvider } from "./lib/navegacion.js";
 import { esAdmin, useSesion } from "./lib/auth.js";
 import { listarNotificaciones } from "./api/client.js";
+import { SkeletonLista } from "./components/Skeleton.jsx";
+
+// Home se queda "eager" (es la pantalla de entrada, no tiene sentido
+// esperar un Suspense para lo primero que ve todo el mundo). El resto
+// se parte en su propio chunk JS y se descarga recién cuando el
+// usuario toca esa pestaña — el bundle inicial baja bastante.
+const Publicar = lazy(() => import("./pages/Publicar.jsx"));
+const Perfil = lazy(() => import("./pages/Perfil.jsx"));
+const Favoritos = lazy(() => import("./pages/Favoritos.jsx"));
+const MisAnuncios = lazy(() => import("./pages/MisAnuncios.jsx"));
+const Candidatos = lazy(() => import("./pages/Candidatos.jsx"));
+const MiPerfilCandidato = lazy(() => import("./pages/MiPerfilCandidato.jsx"));
+const Admin = lazy(() => import("./pages/Admin.jsx"));
+const AnuncioDetalle = lazy(() => import("./pages/AnuncioDetalle.jsx"));
 
 const PANTALLAS = {
   inicio: Home,
@@ -86,7 +92,8 @@ export default function App() {
           />
         )}
         <main style={{ flex: 1 }}>
-          <AnimatePresence mode="popLayout">
+          <Suspense fallback={<div style={{ padding: 14 }}><SkeletonLista n={3} /></div>}>
+            <AnimatePresence mode="popLayout">
             {anuncioAbierto ? (
               <motion.div
                 key="detalle"
@@ -113,6 +120,7 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+          </Suspense>
         </main>
         {!anuncioAbierto && <BottomNav activa={pestana} onCambiar={setPestana} mostrarAdmin={usuarioEsAdmin} />}
       </div>

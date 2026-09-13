@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { listarCategorias, listarDistritos, publicarAnuncio, subirComprobante } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
+import CampoSelect from "../components/CampoSelect.jsx";
 
 const VACIO = {
   categoria: "",
@@ -140,29 +141,21 @@ function FormularioAnuncio({ usuarioId }) {
         }}
       >
         <Campo etiqueta="Categoría">
-          <select style={estiloInput} value={datos.categoria} onChange={actualizar("categoria")} required>
-            <option value="" disabled>
-              Elige una categoría
-            </option>
-            {categorias.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          <CampoSelect
+            value={datos.categoria}
+            onChange={(v) => setDatos((p) => ({ ...p, categoria: v }))}
+            options={categorias}
+            placeholder="Elige una categoría"
+          />
         </Campo>
 
         <Campo etiqueta="Distrito">
-          <select style={estiloInput} value={datos.distrito} onChange={actualizar("distrito")} required>
-            <option value="" disabled>
-              Elige un distrito
-            </option>
-            {distritos.map((dist) => (
-              <option key={dist} value={dist}>
-                {dist}
-              </option>
-            ))}
-          </select>
+          <CampoSelect
+            value={datos.distrito}
+            onChange={(v) => setDatos((p) => ({ ...p, distrito: v }))}
+            options={distritos}
+            placeholder="Elige un distrito"
+          />
         </Campo>
 
         <Campo etiqueta="Título del puesto">

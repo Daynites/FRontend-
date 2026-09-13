@@ -9,6 +9,7 @@ import {
   marcarNotificacionesLeidas,
 } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
+import CampoSelect from "./CampoSelect.jsx";
 
 /**
  * Modal de Alertas + Notificaciones — se abre desde la campana 🔔 de
@@ -194,28 +195,14 @@ function Contenido({ usuarioId, onAbrirAnuncio, onCerrar }) {
 
       <Ornamento>✦ Agregar alerta ✦</Ornamento>
 
-      <select
-        value={nuevaCategoria}
-        onChange={(e) => setNuevaCategoria(e.target.value)}
-        style={{
-          width: "100%",
-          background: "#fff",
-          border: "1.5px solid var(--parch-2)",
-          borderRadius: "var(--radius-sm)",
-          padding: "9px 12px",
-          fontFamily: "var(--font-serif)",
-          fontSize: 13,
-          color: "var(--ink)",
-          marginBottom: 8,
-        }}
-      >
-        <option value="">Elige una categoría</option>
-        {categorias.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
-          </option>
-        ))}
-      </select>
+      <div style={{ marginBottom: 8 }}>
+        <CampoSelect
+          value={nuevaCategoria}
+          onChange={setNuevaCategoria}
+          options={categorias}
+          placeholder="Elige una categoría"
+        />
+      </div>
       <button
         onClick={alAgregar}
         disabled={!nuevaCategoria}

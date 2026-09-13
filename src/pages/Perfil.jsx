@@ -4,6 +4,7 @@ import { misAnuncios } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import { abrirLink } from "../lib/links.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
+import { guardarFotoPerfil, leerFotoPerfil } from "../lib/fotoPerfil.js";
 
 /**
  * Menú de Perfil. "Mis Anuncios" y "Favoritos" ahora son tabs propias
@@ -101,22 +102,7 @@ export default function Perfil({ onCambiarPestana, onAbrirAlertas }) {
               "repeating-linear-gradient(90deg, var(--gold) 0px, var(--gold) 8px, var(--red-andino) 8px, var(--red-andino) 16px, var(--green) 16px, var(--green) 24px, var(--parch-2) 24px, var(--parch-2) 32px)",
           }}
         />
-        <div
-          style={{
-            width: 66,
-            height: 66,
-            margin: "0 auto 10px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--gold), var(--brown-3))",
-            border: "3px solid var(--gold-2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 28,
-          }}
-        >
-          👤
-        </div>
+        <AvatarPerfil usuarioId={sesion.usuarioId} onError={(msg) => setAviso(msg)} />
         <div style={{ fontFamily: "var(--font-heading)", fontSize: 15, fontWeight: 700, color: "var(--gold-2)" }}>
           {sesion.nombre || "Mi Perfil"}
         </div>
@@ -148,6 +134,121 @@ export default function Perfil({ onCambiarPestana, onAbrirAlertas }) {
         }}
       />
     </div>
+  );
+}
+
+function AvatarPerfil({ usuarioId, onError }) {
+  const [foto, setFoto] = useState(() => leerFotoPerfil(usuarioId));
+  const [subiendo, setSubiendo] = useState(false);
+
+  async function alElegirArchivo(e) {
+    const archivo = e.target.files[0];
+    e.target.value = ""; // permite volver a elegir el mismo archivo después
+    if (!archivo) return;
+    setSubiendo(true);
+    try {
+      const dataUrl = await guardarFotoPerfil(usuarioId, archivo);
+      setFoto(dataUrl);
+    } catch (err) {
+      onError?.(err.message);
+    } finally {
+      setSubiendo(false);
+    }
+  }
+
+  return (
+    <label
+      style={{
+        position: "relative",
+        width: 74,
+        height: 74,
+        margin: "0 auto 10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+      }}
+    >
+      <input type="file" accept="image/*" onChange={alElegirArchivo} style={{ display: "none" }} />
+
+      {/* Anillo girando + pulso suave, mismo lenguaje visual que el halo del logo en la cabecera */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: -5,
+          borderRadius: "50%",
+          border: "2px dashed var(--gold-2)",
+          opacity: 0.8,
+          animation: "avatar-girar 10s linear infinite",
+        }}
+      />
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: -9,
+          borderRadius: "50%",
+          border: "1.5px solid rgba(232,200,74,.4)",
+          animation: "avatar-pulso 2.6s ease-out infinite",
+        }}
+      />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: 66,
+          height: 66,
+          borderRadius: "50%",
+          background: foto ? "transparent" : "linear-gradient(135deg, var(--gold), var(--brown-3))",
+          border: "3px solid var(--gold-2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 28,
+          overflow: "hidden",
+        }}
+      >
+        {subiendo ? (
+          <span style={{ fontSize: 13 }}>…</span>
+        ) : foto ? (
+          <img src={foto} alt="Tu foto de perfil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          "👤"
+        )}
+      </div>
+
+      {/* Camarita para indicar que se puede tocar y cambiar */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: -2,
+          right: -2,
+          zIndex: 2,
+          width: 22,
+          height: 22,
+          borderRadius: "50%",
+          background: "var(--brown)",
+          border: "2px solid var(--parch-0)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 11,
+        }}
+      >
+        📷
+      </span>
+
+      <style>{`
+        @keyframes avatar-girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes avatar-pulso { 0% { transform: scale(.92); opacity: .7; } 70% { transform: scale(1.18); opacity: 0; } 100% { opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+          label span[aria-hidden] { animation: none !important; }
+        }
+      `}</style>
+    </label>
   );
 }
 

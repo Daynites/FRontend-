@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { listarCandidatos, listarCategorias } from "../api/client.js";
 import { abrirLink } from "../lib/links.js";
 import { SkeletonLinea, SkeletonLista } from "../components/Skeleton.jsx";
+import CampoSelect from "../components/CampoSelect.jsx";
 
 export default function Candidatos() {
   const [categorias, setCategorias] = useState([]);
@@ -66,28 +67,12 @@ export default function Candidatos() {
         >
           Filtrar por categoría
         </label>
-        <select
+        <CampoSelect
           value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-          style={{
-            width: "100%",
-            background: "#fff",
-            border: "1.5px solid var(--parch-2)",
-            borderRadius: "var(--radius-sm)",
-            padding: "9px 12px",
-            fontFamily: "var(--font-serif)",
-            fontSize: 13,
-            color: "var(--ink)",
-            outline: "none",
-          }}
-        >
-          <option value="">Elige una categoría</option>
-          {categorias.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          onChange={setCategoria}
+          options={categorias}
+          placeholder="Elige una categoría"
+        />
       </div>
 
       {!categoria && (

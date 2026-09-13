@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { guardarPerfilCandidato, listarCategorias, listarDistritos, obtenerPerfilCandidato } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
+import CampoSelect from "../components/CampoSelect.jsx";
 
 export default function MiPerfilCandidato() {
   const { sesion, iniciarSesionConCredential } = useSesion();
@@ -317,45 +318,48 @@ function FormularioCandidato({ usuarioId, inicial, onGuardado, onCancelar, aviso
 
         <Campo etiqueta="Categorías laborales * (selecciona las que apliquen)">
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-            {categoriasDisponibles.map((cat) => (
-              <button
-                type="button"
-                key={cat}
-                onClick={() => alternarCategoria(cat)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  background: datos.categorias.includes(cat) ? "var(--brown)" : "var(--parch-1)",
-                  border: `1.5px solid ${datos.categorias.includes(cat) ? "var(--brown)" : "var(--parch-3)"}`,
-                  borderRadius: "var(--radius-pill)",
-                  padding: "6px 12px",
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 12,
-                  color: datos.categorias.includes(cat) ? "var(--gold-2)" : "var(--ink-2)",
-                  fontWeight: datos.categorias.includes(cat) ? 600 : 400,
-                  cursor: "pointer",
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+            {categoriasDisponibles.map((cat) => {
+              const activa = datos.categorias.includes(cat);
+              return (
+                <motion.button
+                  type="button"
+                  key={cat}
+                  onClick={() => alternarCategoria(cat)}
+                  whileTap={{ scale: 0.9 }}
+                  animate={activa ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    background: activa ? "var(--brown)" : "var(--parch-1)",
+                    border: `1.5px solid ${activa ? "var(--brown)" : "var(--parch-3)"}`,
+                    borderRadius: "var(--radius-pill)",
+                    padding: "6px 12px",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: 12,
+                    color: activa ? "var(--gold-2)" : "var(--ink-2)",
+                    fontWeight: activa ? 600 : 400,
+                    cursor: "pointer",
+                  }}
+                >
+                  {cat}
+                </motion.button>
+              );
+            })}
           </div>
         </Campo>
 
         <Campo etiqueta="Distrito (opcional)">
-          <select
-            style={estiloInput}
+          <CampoSelect
             value={datos.distrito}
-            onChange={(e) => setDatos((p) => ({ ...p, distrito: e.target.value }))}
-          >
-            <option value="">Sin preferencia de distrito</option>
-            {distritos.map((d) => (
-              <option key={d} value={d}>
-                📍 {d}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setDatos((p) => ({ ...p, distrito: v }))}
+            options={[
+              { value: "", label: "Sin preferencia de distrito" },
+              ...distritos.map((d) => ({ value: d, label: `📍 ${d}` })),
+            ]}
+            placeholder="Sin preferencia de distrito"
+          />
         </Campo>
 
         <Campo etiqueta="Experiencia (opcional)">
