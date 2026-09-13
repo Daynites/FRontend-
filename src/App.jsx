@@ -91,7 +91,7 @@ export default function App() {
           ),
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", position: "relative" }}>
         {!anuncioAbierto && (
           <AppHeader
             onAbrirPerfil={() => setPestana("perfil")}
@@ -106,7 +106,7 @@ export default function App() {
             hayNoLeidas={hayNoLeidas}
           />
         )}
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, position: "relative" }}>
           <Suspense fallback={<div style={{ padding: 14 }}><SkeletonLista n={3} /></div>}>
             <AnimatePresence mode="popLayout">
             {anuncioAbierto ? (
