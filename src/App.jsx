@@ -108,7 +108,7 @@ export default function App() {
         )}
         <main style={{ flex: 1, position: "relative" }}>
           <Suspense fallback={<div style={{ padding: 14 }}><SkeletonLista n={3} /></div>}>
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="wait">
             {anuncioAbierto ? (
               <motion.div
                 key="detalle"
