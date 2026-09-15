@@ -1,31 +1,15 @@
-import { useMemo } from "react";
 import { motion } from "framer-motion";
 
-const DURACION_MINIMA_MS = 2400;
-
-/** Genera las 5 chispas una sola vez (posición/duración aleatoria, como en el prototipo). */
-function generarParticulas() {
-  return Array.from({ length: 5 }, () => {
-    const duracion = 6 + Math.random() * 3;
-    return {
-      left: 20 + Math.random() * 60,
-      drift: Math.random() * 40 - 20,
-      duracion,
-      delay: Math.random() * duracion,
-      tamano: 2 + Math.random() * 1.5,
-    };
-  });
-}
+const DURACION_MINIMA_MS = 2600;
 
 /**
- * Splash de bienvenida — migrado del prototipo estático (humo,
- * chispas subiendo, anillo dorado girando, logo respirando, flash de
- * salida). Se muestra `DURACION_MINIMA_MS` como mínimo y se puede
+ * Splash de bienvenida — "amanecer sobre las montañas". Una sola
+ * pasada (nada de loops infinitos): el cielo pasa de noche a amanecer,
+ * la cordillera se traza como con una pluma y luego se solidifica, el
+ * sol se asoma detrás, y el logo se funde encima al final. Se puede
  * saltar tocando la pantalla.
  */
 export default function SplashScreen({ onTerminar }) {
-  const particulas = useMemo(generarParticulas, []);
-
   return (
     <motion.div
       onClick={onTerminar}
@@ -35,124 +19,114 @@ export default function SplashScreen({ onTerminar }) {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "var(--brown)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         overflow: "hidden",
         cursor: "pointer",
+        background: "linear-gradient(180deg, #0d1b3a 0%, #1c2f52 55%, #2c1810 100%)",
       }}
     >
-      {/* Humo dorado respirando */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: "-20%",
-          background:
-            "radial-gradient(circle at 50% 55%, rgba(196,154,40,.35) 0%, transparent 60%), radial-gradient(circle at 40% 40%, rgba(122,80,32,.28) 0%, transparent 55%)",
-          filter: "blur(30px)",
-          animation: "sp-humo 6s ease-in-out infinite",
-        }}
-      />
-
-      {/* Chispas subiendo */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "50%",
-          bottom: "50%",
-          width: "min(60vw, 260px)",
-          height: "min(60vw, 260px)",
-          transform: "translate(-50%, 40%)",
-        }}
-      >
-        {particulas.map((p, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: `${p.left}%`,
-              width: p.tamano,
-              height: p.tamano,
-              borderRadius: "50%",
-              background: "var(--gold-3)",
-              boxShadow: "0 0 5px 1.5px rgba(232,200,74,.85)",
-              opacity: 0,
-              "--drift": `${p.drift}px`,
-              animation: `sp-subir ${p.duracion}s ease-in infinite, sp-parpadeo 1.6s ease-in-out infinite`,
-              animationDelay: `${p.delay}s, 0s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Logo con anillo y halo */}
-      <div style={{ position: "relative", width: "min(72vw, 320px)", height: "min(72vw, 320px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: "-6%",
-            borderRadius: "50%",
-            padding: 3,
-            background:
-              "conic-gradient(from 0deg, transparent 0%, rgba(196,154,40,0) 70%, rgba(232,200,74,1) 82%, rgba(245,224,144,1) 86%, rgba(196,154,40,0) 92%, transparent 100%)",
-            WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))",
-            mask: "radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))",
-            animation: "sp-girar 4s linear infinite",
-            opacity: 0.9,
-          }}
-        />
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: "2%",
-            borderRadius: "50%",
-            border: "2px solid rgba(232,200,74,.55)",
-            animation: "sp-pulso 3.4s ease-out infinite",
-          }}
-        />
-        <img
-          src="/assets/logo_junin.webp"
-          alt="Junín Anuncios"
-          style={{
-            position: "relative",
-            zIndex: 2,
-            width: "82%",
-            height: "82%",
-            objectFit: "contain",
-            filter: "drop-shadow(0 0 22px rgba(232,200,74,.55))",
-            animation: "sp-respirar 3.4s ease-in-out infinite",
-          }}
-        />
-      </div>
-
-      {/* Flash inicial */}
+      {/* Capa de amanecer — se funde encima del cielo nocturno */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(circle at 50% 50%, #fff 0%, rgba(255,255,255,.6) 25%, transparent 65%)",
-          animation: "sp-flash 900ms ease-out 1",
-          pointerEvents: "none",
+          background:
+            "linear-gradient(180deg, #2a2f5c 0%, #7a4a3a 45%, #c4762a 75%, #e8a23f 100%)",
+          animation: "sp-amanecer 1.6s ease-in-out 0.2s forwards",
+          opacity: 0,
         }}
       />
 
+      {/* Sol asomándose */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "58%",
+          width: "34vw",
+          maxWidth: 150,
+          aspectRatio: "1",
+          borderRadius: "50%",
+          transform: "translate(-50%, 0)",
+          background: "radial-gradient(circle, #fff1c2 0%, #f5c15a 45%, rgba(245,193,90,0) 75%)",
+          boxShadow: "0 0 60px 20px rgba(245,193,90,.45)",
+          opacity: 0,
+          animation: "sp-sol 1.8s cubic-bezier(.2,.7,.3,1) 0.5s forwards",
+        }}
+      />
+
+      {/* Cordillera — trazo de contorno */}
+      <svg
+        viewBox="0 0 400 200"
+        preserveAspectRatio="none"
+        style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "42%" }}
+      >
+        <path
+          d="M0,160 L55,95 L95,135 L145,65 L185,115 L228,52 L278,122 L328,82 L400,140"
+          fill="none"
+          stroke="#f5d99a"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            strokeDasharray: 900,
+            strokeDashoffset: 900,
+            animation: "sp-trazo 1.3s ease-out 0.15s forwards",
+            filter: "drop-shadow(0 0 4px rgba(245,217,154,.6))",
+          }}
+        />
+      </svg>
+
+      {/* Cordillera — silueta sólida, se asienta después del trazo y tapa la parte baja del sol */}
+      <svg
+        viewBox="0 0 400 200"
+        preserveAspectRatio="none"
+        style={{ position: "absolute", left: 0, right: 0, bottom: 0, width: "100%", height: "42%" }}
+      >
+        <path
+          d="M0,160 L55,95 L95,135 L145,65 L185,115 L228,52 L278,122 L328,82 L400,140 L400,200 L0,200 Z"
+          fill="#1c1006"
+          style={{ opacity: 0, animation: "sp-silueta .7s ease-out 1.15s forwards" }}
+        />
+      </svg>
+
+      {/* Logo, se funde encima al final */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img
+          src="/assets/logo_junin.webp"
+          alt="Junín Anuncios"
+          style={{
+            width: "min(58vw, 250px)",
+            filter: "drop-shadow(0 6px 20px rgba(0,0,0,.5))",
+            opacity: 0,
+            animation: "sp-logo 0.8s ease-out 1.7s forwards",
+          }}
+        />
+      </div>
+
       <style>{`
-        @keyframes sp-humo { 0%,100% { transform: scale(1) rotate(0deg); opacity:.7; } 50% { transform: scale(1.15) rotate(4deg); opacity:1; } }
-        @keyframes sp-subir { 0% { transform: translateY(0) translateX(0); opacity:0; } 12% { opacity:.9; } 88% { opacity:.3; } 100% { transform: translateY(-180px) translateX(var(--drift,0px)); opacity:0; } }
-        @keyframes sp-parpadeo { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.6); } }
-        @keyframes sp-girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes sp-pulso { 0% { transform: scale(.9); opacity:0; } 15% { opacity:.9; } 60% { transform: scale(1.18); opacity:0; } 100% { opacity:0; } }
-        @keyframes sp-respirar { 0%,100% { transform: scale(1); } 50% { transform: scale(1.025); } }
-        @keyframes sp-flash { 0% { opacity:1; } 100% { opacity:0; } }
+        @keyframes sp-amanecer { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes sp-sol {
+          0% { opacity: 0; transform: translate(-50%, 30px) scale(.85); }
+          100% { opacity: 1; transform: translate(-50%, -55px) scale(1); }
+        }
+        @keyframes sp-trazo { to { stroke-dashoffset: 0; } }
+        @keyframes sp-silueta { to { opacity: 1; } }
+        @keyframes sp-logo {
+          from { opacity: 0; transform: scale(.9) translateY(6px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
         @media (prefers-reduced-motion: reduce) {
-          * { animation: none !important; }
+          * { animation: none !important; opacity: 1 !important; }
         }
       `}</style>
     </motion.div>

@@ -442,8 +442,9 @@ function Campo({ etiqueta, ultimo, children }) {
           display: "block",
           fontFamily: "var(--font-heading)",
           fontSize: 9.5,
+          fontWeight: 700,
           letterSpacing: 1.5,
-          color: "var(--gold)",
+          color: "var(--brown-2)",
           textTransform: "uppercase",
           marginBottom: 5,
         }}
