@@ -100,6 +100,60 @@ export function listarCandidatos(categoria) {
   return pedir(`/candidatos?categoria=${encodeURIComponent(categoria)}`);
 }
 
+/* ── Escáner de Trabajo / VIP ─────────────────────────────────────
+   Candidatos: de pago (S/.5/mes, comprobante + aprobación manual).
+   Anunciantes: gratis, solo necesitan un anuncio aprobado. */
+
+export function verEstadoScanner(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/scanner/estado`);
+}
+
+export async function subirComprobanteScanner(usuarioId, archivo) {
+  const token = obtenerToken();
+  const formData = new FormData();
+  formData.append("archivo", archivo);
+  const res = await fetch(`${BASE_URL}/usuarios/${usuarioId}/scanner/comprobante`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Error ${res.status} al subir el comprobante`);
+  return true;
+}
+
+/** Escáner de Trabajo — anuncios que calzan con el perfil del candidato (requiere estar activo/vigente). */
+export function verAnunciosEscaner(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/scanner/anuncios`);
+}
+
+/** Escáner de Candidatos — candidatos que calzan con las categorías del anunciante (gratis). */
+export function verCandidatosEscaner(usuarioId) {
+  return pedir(`/usuarios/${usuarioId}/scanner/candidatos`);
+}
+
+export function adminScannerPendientes() {
+  return pedirAutenticado("/admin/scanner/pendientes");
+}
+
+export async function adminVerComprobanteScanner(usuarioId) {
+  const token = obtenerToken();
+  const res = await fetch(`${BASE_URL}/admin/scanner/${usuarioId}/comprobante`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Error ${res.status} al cargar el comprobante`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+export function adminAprobarScanner(usuarioId) {
+  return pedirAutenticado(`/admin/scanner/${usuarioId}/aprobar`, { method: "POST" });
+}
+
+export function adminRechazarScanner(usuarioId) {
+  return pedirAutenticado(`/admin/scanner/${usuarioId}/rechazar`, { method: "POST" });
+}
+
 /* ── Alertas y notificaciones ─────────────────────────────────── */
 
 export function listarNotificaciones(usuarioId) {

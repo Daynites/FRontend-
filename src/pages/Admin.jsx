@@ -9,6 +9,10 @@ import {
   adminStats,
   adminUsuarios,
   adminVerComprobante,
+  adminScannerPendientes,
+  adminAprobarScanner,
+  adminRechazarScanner,
+  adminVerComprobanteScanner,
 } from "../api/client.js";
 import { SkeletonLinea, SkeletonLista } from "../components/Skeleton.jsx";
 
@@ -17,6 +21,7 @@ const TABS = [
   { id: "pendientes", label: "⏳ Pendientes" },
   { id: "activos", label: "✅ Activos" },
   { id: "usuarios", label: "👥 Usuarios" },
+  { id: "scanner", label: "🔍 Escáner" },
 ];
 
 /**
@@ -136,6 +141,7 @@ export default function Admin() {
         />
       )}
       {tab === "usuarios" && <PanelUsuarios onError={(msg) => setAviso({ tipo: "error", texto: msg })} />}
+      {tab === "scanner" && <PanelScanner onAviso={setAviso} />}
     </div>
   );
 }
@@ -371,6 +377,117 @@ function PanelUsuarios({ onError }) {
           <div style={{ fontSize: 10, color: "var(--ink-3)", flexShrink: 0 }}>{u.fecha}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function PanelScanner({ onAviso }) {
+  const [solicitudes, setSolicitudes] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    adminScannerPendientes()
+      .then((d) => setSolicitudes(d.solicitudes))
+      .catch((e) => {
+        setError(e.message);
+        onAviso({ tipo: "error", texto: `No se pudo cargar: ${e.message}` });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function verComprobante(usuarioId) {
+    try {
+      const url = await adminVerComprobanteScanner(usuarioId);
+      if (!url) {
+        onAviso({ tipo: "error", texto: "Este usuario no tiene comprobante subido" });
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      onAviso({ tipo: "error", texto: e.message });
+    }
+  }
+
+  async function aprobar(usuarioId) {
+    if (!confirm(`¿Activar el Escáner de Trabajo (VIP) para el usuario #${usuarioId}?`)) return;
+    try {
+      await adminAprobarScanner(usuarioId);
+      onAviso({ texto: `Escáner activado para #${usuarioId} ✅` });
+      setSolicitudes((prev) => prev.filter((s) => s.usuario_id !== usuarioId));
+    } catch (e) {
+      onAviso({ tipo: "error", texto: e.message });
+    }
+  }
+
+  async function rechazar(usuarioId) {
+    if (!confirm(`¿Rechazar la solicitud de Escáner del usuario #${usuarioId}?`)) return;
+    try {
+      await adminRechazarScanner(usuarioId);
+      onAviso({ texto: `Solicitud de #${usuarioId} rechazada ❌` });
+      setSolicitudes((prev) => prev.filter((s) => s.usuario_id !== usuarioId));
+    } catch (e) {
+      onAviso({ tipo: "error", texto: e.message });
+    }
+  }
+
+  if (error) return <MensajeError texto={error} />;
+  if (!solicitudes) return <Cargando texto="Cargando solicitudes…" />;
+  if (solicitudes.length === 0) return <MensajeVacio icono="🔍" texto="Sin solicitudes pendientes" />;
+
+  return (
+    <div>
+      <AnimatePresence>
+        {solicitudes.map((s) => (
+          <motion.div
+            key={s.usuario_id}
+            layout
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: -20, transition: { duration: 0.15 } }}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              background: "var(--parch-0)",
+              border: "1.5px solid var(--parch-2)",
+              borderRadius: "var(--radius-md)",
+              padding: "12px 13px",
+              marginBottom: 8,
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 4,
+                background: "linear-gradient(to bottom, var(--gold), var(--parch-3))",
+              }}
+            />
+            <div style={{ fontFamily: "var(--font-serif)", fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>
+              👤 {s.nombre || "Sin nombre"} <span style={{ color: "var(--ink-3)", fontWeight: 400 }}>#{s.usuario_id}</span>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 2 }}>
+              {s.categoria} {s.puesto && `· ${s.puesto}`}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--ink-3)" }}>🗓 Solicitado: {s.fecha}</div>
+
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <BotonAdmin onClick={() => verComprobante(s.usuario_id)} variante="ok">
+                🧾 Comprobante
+              </BotonAdmin>
+              <BotonAdmin onClick={() => aprobar(s.usuario_id)} variante="ok">
+                ✅ Activar
+              </BotonAdmin>
+              <BotonAdmin onClick={() => rechazar(s.usuario_id)} variante="no">
+                ❌ Rechazar
+              </BotonAdmin>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

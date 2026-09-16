@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { guardarPerfilCandidato, listarCategorias, listarDistritos, obtenerPerfilCandidato } from "../api/client.js";
+import {
+  guardarPerfilCandidato,
+  listarCategorias,
+  listarDistritos,
+  obtenerPerfilCandidato,
+  subirComprobanteScanner,
+  verEstadoScanner,
+} from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
 import CampoSelect from "../components/CampoSelect.jsx";
 
-export default function MiPerfilCandidato() {
+export default function MiPerfilCandidato({ onCambiarPestana }) {
   const { sesion, iniciarSesionConCredential } = useSesion();
 
   if (!sesion) {
@@ -24,10 +31,10 @@ export default function MiPerfilCandidato() {
     );
   }
 
-  return <PantallaCandidato usuarioId={sesion.usuarioId} />;
+  return <PantallaCandidato usuarioId={sesion.usuarioId} onCambiarPestana={onCambiarPestana} />;
 }
 
-function PantallaCandidato({ usuarioId }) {
+function PantallaCandidato({ usuarioId, onCambiarPestana }) {
   const [perfil, setPerfil] = useState(undefined); // undefined = cargando, null = no tiene
   const [modoFormulario, setModoFormulario] = useState(false);
 
@@ -71,13 +78,18 @@ function PantallaCandidato({ usuarioId }) {
       )}
 
       {perfil !== undefined && perfil && !modoFormulario && (
-        <VistaPerfil perfil={perfil} onEditar={() => setModoFormulario(true)} />
+        <VistaPerfil
+          usuarioId={usuarioId}
+          perfil={perfil}
+          onEditar={() => setModoFormulario(true)}
+          onVerAnunciosEscaner={() => onCambiarPestana?.("escaner-trabajo")}
+        />
       )}
     </div>
   );
 }
 
-function VistaPerfil({ perfil, onEditar }) {
+function VistaPerfil({ usuarioId, perfil, onEditar, onVerAnunciosEscaner }) {
   const [reiniciando, setReiniciando] = useState(false);
   const categorias = perfil.categoria ? perfil.categoria.split(",").map((c) => c.trim()) : [];
 
@@ -191,7 +203,111 @@ function VistaPerfil({ perfil, onEditar }) {
       <p style={{ fontSize: 11.5, color: "var(--ink-3)", textAlign: "center", marginTop: 10 }}>
         Tu perfil es visible para empresas que buscan candidatos.
       </p>
+
+      <EscanerSeccion usuarioId={usuarioId} onVerAnuncios={onVerAnunciosEscaner} />
     </motion.div>
+  );
+}
+
+function EscanerSeccion({ usuarioId, onVerAnuncios }) {
+  const [estado, setEstado] = useState(undefined); // undefined = cargando
+  const [subiendo, setSubiendo] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    verEstadoScanner(usuarioId)
+      .then(setEstado)
+      .catch((e) => setError(e.message));
+  }, [usuarioId]);
+
+  async function alElegirComprobante(e) {
+    const archivo = e.target.files[0];
+    e.target.value = "";
+    if (!archivo) return;
+    setSubiendo(true);
+    setError(null);
+    try {
+      await subirComprobanteScanner(usuarioId, archivo);
+      setEstado((prev) => ({ ...prev, scanner_estado: "pendiente" }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubiendo(false);
+    }
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        paddingTop: 14,
+        borderTop: "1px dashed var(--parch-3)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <span style={{ fontSize: 15 }}>🔍</span>
+        <span style={{ fontFamily: "var(--font-heading)", fontSize: 12, fontWeight: 700, color: "var(--brown-2)" }}>
+          Escáner de Trabajo
+        </span>
+      </div>
+
+      {estado === undefined && !error && (
+        <p style={{ fontSize: 12.5, color: "var(--ink-3)" }}>Cargando…</p>
+      )}
+      {error && <p style={{ fontSize: 12.5, color: "var(--red-andino)" }}>{error}</p>}
+
+      {estado && estado.scanner_estado === "activo" && (
+        <div
+          style={{
+            background: "rgba(30,107,52,.08)",
+            border: "1px solid rgba(30,107,52,.3)",
+            borderRadius: "var(--radius-sm)",
+            padding: "10px 12px",
+          }}
+        >
+          <p style={{ margin: "0 0 8px", fontSize: 12.5, color: "var(--green)", fontWeight: 600 }}>
+            ✅ Activo hasta el {estado.vip_expira} — ya eres VIP ✨, los anunciantes te ven primero.
+          </p>
+          <BotonAccion onClick={onVerAnuncios} color="brown">
+            🔍 Ver anuncios para mí
+          </BotonAccion>
+        </div>
+      )}
+
+      {estado && estado.scanner_estado === "pendiente" && (
+        <p style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
+          🕓 Tu comprobante está en revisión — te avisamos apenas se apruebe.
+        </p>
+      )}
+
+      {estado && (estado.scanner_estado === "inactivo" || estado.scanner_estado === "vencido") && (
+        <div>
+          <p style={{ fontSize: 12.5, color: "var(--ink-2)", marginBottom: 8 }}>
+            {estado.scanner_estado === "vencido"
+              ? "Tu Escáner venció. Renuévalo por S/.5/mes para seguir viendo trabajos automáticamente y ser VIP."
+              : "Por S/.5/mes, el Escáner te muestra automáticamente los anuncios que calzan con tu perfil, y te vuelve VIP (los anunciantes te ven primero)."}
+          </p>
+          <label
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: subiendo ? "var(--parch-3)" : "linear-gradient(135deg, var(--brown), var(--brown-3))",
+              color: "#fff",
+              borderRadius: "var(--radius-pill)",
+              padding: "9px 16px",
+              fontFamily: "var(--font-serif)",
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: subiendo ? "default" : "pointer",
+            }}
+          >
+            {subiendo ? "Subiendo…" : "🧾 Subir comprobante (S/.5)"}
+            <input type="file" accept="image/*" onChange={alElegirComprobante} disabled={subiendo} style={{ display: "none" }} />
+          </label>
+        </div>
+      )}
+    </div>
   );
 }
 

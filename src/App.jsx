@@ -20,6 +20,7 @@ const Favoritos = lazy(() => import("./pages/Favoritos.jsx"));
 const MisAnuncios = lazy(() => import("./pages/MisAnuncios.jsx"));
 const Candidatos = lazy(() => import("./pages/Candidatos.jsx"));
 const MiPerfilCandidato = lazy(() => import("./pages/MiPerfilCandidato.jsx"));
+const EscanerTrabajo = lazy(() => import("./pages/EscanerTrabajo.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 const AnuncioDetalle = lazy(() => import("./pages/AnuncioDetalle.jsx"));
 
@@ -29,6 +30,7 @@ const PANTALLAS = {
   "mis-anuncios": MisAnuncios,
   candidatos: Candidatos,
   "perfil-candidato": MiPerfilCandidato,
+  "escaner-trabajo": EscanerTrabajo,
   publicar: Publicar,
   perfil: Perfil,
   admin: Admin,
