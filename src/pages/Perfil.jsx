@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { misAnuncios } from "../api/client.js";
+import { misAnuncios, verEstadoScanner } from "../api/client.js";
 import { useSesion } from "../lib/auth.js";
 import { abrirLink } from "../lib/links.js";
 import BotonGoogle from "../components/BotonGoogle.jsx";
@@ -14,12 +14,16 @@ import { guardarFotoPerfil, leerFotoPerfil } from "../lib/fotoPerfil.js";
 export default function Perfil({ onCambiarPestana, onAbrirAlertas, puedeVerCandidatos }) {
   const { sesion, iniciarSesionConCredential, cerrarSesion } = useSesion();
   const [misAnunciosData, setMisAnunciosData] = useState(null);
+  const [scannerEstado, setScannerEstado] = useState(null);
   const [aviso, setAviso] = useState(null);
 
   useEffect(() => {
     if (!sesion) return;
     misAnuncios(sesion.usuarioId)
       .then((d) => setMisAnunciosData(d.anuncios))
+      .catch(() => {});
+    verEstadoScanner(sesion.usuarioId)
+      .then(setScannerEstado)
       .catch(() => {});
   }, [sesion]);
 
@@ -51,6 +55,14 @@ export default function Perfil({ onCambiarPestana, onAbrirAlertas, puedeVerCandi
 
   const total = misAnunciosData?.length ?? null;
   const aprobados = misAnunciosData?.filter((a) => a.estado === "aprobado").length ?? null;
+
+  function alTocarEscaner() {
+    if (scannerEstado?.es_vip) {
+      onCambiarPestana?.("escaner-trabajo");
+    } else {
+      setAviso("🔒 Esta función es exclusiva para usuarios VIP — actívala en Mi Perfil de Candidato (S/.5/mes).");
+    }
+  }
 
   return (
     <div style={{ padding: "14px 16px 32px", position: "relative" }}>
@@ -122,6 +134,7 @@ export default function Perfil({ onCambiarPestana, onAbrirAlertas, puedeVerCandi
       <MenuItem icono="🔔" titulo="Notificaciones push" sub="Próximamente" onClick={() => proximamente("Notificaciones push")} />
       <MenuItem icono="➡️" titulo="Favoritos" sub="Anuncios que guardaste" onClick={() => onCambiarPestana?.("favoritos")} />
       <MenuItem icono="🪪" titulo="Mi Perfil de Candidato" sub="Que las empresas te encuentren" onClick={() => onCambiarPestana?.("perfil-candidato")} />
+      <MenuItemEscaner esVip={!!scannerEstado?.es_vip} onClick={alTocarEscaner} />
       {puedeVerCandidatos && (
         <MenuItem icono="👥" titulo="Buscar Candidatos" sub="Ver quién busca trabajo" onClick={() => onCambiarPestana?.("candidatos")} />
       )}
@@ -270,6 +283,66 @@ function StatBox({ n, label }) {
       <div style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 700, color: "var(--ink)" }}>{n}</div>
       <div style={{ fontSize: 10, color: "var(--ink-3)", marginTop: 2 }}>{label}</div>
     </div>
+  );
+}
+
+function MenuItemEscaner({ esVip, onClick }) {
+  return (
+    <motion.div
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      style={{
+        background: esVip ? "rgba(196,154,40,.08)" : "var(--parch-0)",
+        border: `1.5px solid ${esVip ? "var(--gold)" : "var(--parch-2)"}`,
+        borderRadius: "var(--radius-md)",
+        padding: "13px 14px",
+        marginBottom: 8,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        cursor: "pointer",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <div style={{ fontSize: 22, flexShrink: 0 }}>🔍</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: "var(--font-serif)", fontSize: 14, fontWeight: 600, color: "var(--ink)", display: "flex", alignItems: "center", gap: 6 }}>
+          Escáner de Trabajo
+          {esVip && (
+            <span
+              style={{
+                background: "linear-gradient(135deg, var(--gold), var(--gold-2))",
+                color: "var(--brown)",
+                borderRadius: "var(--radius-pill)",
+                padding: "1px 7px",
+                fontSize: 9,
+                fontWeight: 700,
+              }}
+            >
+              ✨ VIP
+            </span>
+          )}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--ink-3)", marginTop: 2 }}>
+          {esVip ? "Anuncios que calzan con tu perfil" : "Búsqueda automática · S/.5/mes"}
+        </div>
+      </div>
+      <div
+        style={{
+          flexShrink: 0,
+          background: esVip ? "var(--brown)" : "var(--parch-2)",
+          color: esVip ? "var(--gold-2)" : "var(--ink-3)",
+          borderRadius: "var(--radius-pill)",
+          padding: "6px 12px",
+          fontFamily: "var(--font-heading)",
+          fontSize: 10.5,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+        }}
+      >
+        ESCANEAR
+      </div>
+    </motion.div>
   );
 }
 
