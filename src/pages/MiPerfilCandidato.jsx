@@ -281,11 +281,24 @@ function EscanerSeccion({ usuarioId, onVerAnuncios }) {
       )}
 
       {estado && (estado.scanner_estado === "inactivo" || estado.scanner_estado === "vencido") && (
-        <div>
-          <p style={{ fontSize: 12.5, color: "var(--ink-2)", marginBottom: 8 }}>
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(196,154,40,.1), rgba(90,48,16,.06))",
+            border: "1.5px solid var(--gold)",
+            borderRadius: "var(--radius-md)",
+            padding: "12px 14px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 16 }}>⭐</span>
+            <span style={{ fontFamily: "var(--font-heading)", fontSize: 13, fontWeight: 700, color: "var(--brown-2)" }}>
+              {estado.scanner_estado === "vencido" ? "Renueva tu VIP" : "Conviértete en Usuario VIP"}
+            </span>
+          </div>
+          <p style={{ fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.5, margin: "0 0 10px" }}>
             {estado.scanner_estado === "vencido"
-              ? "Tu Escáner venció. Renuévalo por S/.5/mes para seguir viendo trabajos automáticamente y ser VIP."
-              : "Por S/.5/mes, el Escáner te muestra automáticamente los anuncios que calzan con tu perfil, y te vuelve VIP (los anunciantes te ven primero)."}
+              ? "Tu VIP venció. Renuévalo por S/.5/mes: sigue posicionándote destacado ante los anunciantes y escaneando empleos con un solo click."
+              : "Al ser usuario VIP podrás posicionarte como destacado en la lista de candidatos y podrás escanear empleos con un solo click."}
           </p>
           <label
             style={{
@@ -302,9 +315,12 @@ function EscanerSeccion({ usuarioId, onVerAnuncios }) {
               cursor: subiendo ? "default" : "pointer",
             }}
           >
-            {subiendo ? "Subiendo…" : "🧾 Subir comprobante (S/.5)"}
+            {subiendo ? "Subiendo…" : "⭐ Hacerme VIP — S/.5/mes"}
             <input type="file" accept="image/*" onChange={alElegirComprobante} disabled={subiendo} style={{ display: "none" }} />
           </label>
+          <p style={{ fontSize: 10.5, color: "var(--ink-3)", marginTop: 6 }}>
+            Sube tu comprobante de pago (Yape/Plin/transferencia) — lo revisamos y activamos en poco tiempo.
+          </p>
         </div>
       )}
     </div>
